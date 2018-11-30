@@ -11,10 +11,17 @@ Licensed under the BSD 3-Clause License.
 See LICENSE.md
 """
 from inspect import getfullargspec
-from typing import Callable
+from logging import getLogger
+from typing import Callable, Dict
+from uuid import UUID
 
 from Modules.context import Context
+from .parsers import ArgumentParser
+from .types import Rescue
 
+log = getLogger(f"mecha.{__name__}")
+
+registered_parsers: Dict[Callable, ArgumentParser] = {}
 
 def parametrize(func: Callable) -> Callable:
     """
@@ -78,12 +85,40 @@ def parametrize(func: Callable) -> Callable:
     # get the func's specification
     spec = getfullargspec(func)
 
+    # #################
+    # Sanity checks
+    # ######
     assert "context" in spec.args, "function must accept a context argument."
     assert spec.annotations['context'] is Context, "the `context` argument must be of type Context."
 
-    # build a list of arguments except for context and iterate over it
-    for arg in [argument for argument in spec.args if argument != "context"]:
+    # build a list of arguments except for context
+    arguments = [argument for argument in spec.args if argument != "context"]
+    # and loop over it for sanity
+    for arg in arguments:
         assert arg in spec.annotations, f"argument {arg} **must** have a defined type."
 
+    # make a parser for the func (and use its name, its a justified use of magic!
+    parser = ArgumentParser(prog=func.__name__)
+    # #################
+    # Argument group building
+    # #####
+
+    # we should stop getting into so many arguments, shouldn't we? :P
+    for argument in arguments:
+        # get the functions annotation
+        annotation = spec.annotations[argument]
+
+        # check if we have a Rescue type
+        if annotation in [Rescue, Rescue[int], Rescue[str], Rescue[UUID]]:
+            # use an ugly hack to get the specified sub-type. Im not happy i need to touch a magic
+            # here but its not publicly exposed and im NOT subclassing (move the shit elsewhere).
+
+            subtype = annotation.__args__[0] if annotation.__args__ else None
+
+            log.debug(f"adding parser group by the name {argument} with subtype {subtype}...")
+            parser.add_rescue_param(argument, subtype)
+
+    # register the parser
+    registered_parsers[func] = parser
     # return the original
     return func
