@@ -23,6 +23,7 @@ log = getLogger(f"mecha.{__name__}")
 
 registered_parsers: Dict[Callable, ArgumentParser] = {}
 
+
 def parametrize(func: Callable) -> Callable:
     """
     Marks a command definition for parametrization.
@@ -93,26 +94,29 @@ def parametrize(func: Callable) -> Callable:
 
     # build a list of arguments except for context
     arguments = [argument for argument in spec.args if argument != "context"]
-    # and loop over it for sanity
+    # assert sanity
     for arg in arguments:
         assert arg in spec.annotations, f"argument {arg} **must** have a defined type."
 
-    # make a parser for the func (and use its name, its a justified use of magic!
+    # make a parser for the func, and use the func's name for the parser
     parser = ArgumentParser(prog=func.__name__)
+
     # #################
     # Argument group building
     # #####
 
     # we should stop getting into so many arguments, shouldn't we? :P
+
+    # for each argument
     for argument in arguments:
-        # get the functions annotation
+        # get the argument's annotation
         annotation = spec.annotations[argument]
 
         # check if we have a Rescue type
         if annotation in [Rescue, Rescue[int], Rescue[str], Rescue[UUID]]:
             # use an ugly hack to get the specified sub-type. Im not happy i need to touch a magic
             # here but its not publicly exposed and im NOT subclassing (move the shit elsewhere).
-
+            # suggestions on how to access the subtype more clearly are welcome.
             subtype = annotation.__args__[0] if annotation.__args__ else None
 
             log.debug(f"adding parser group by the name {argument} with subtype {subtype}...")

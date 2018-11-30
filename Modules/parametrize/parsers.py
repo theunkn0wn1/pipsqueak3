@@ -47,28 +47,14 @@ class ArgumentParser(QuittingArgumentParser):
 
     def print_help(self, file=None):
         log.debug(f"intercepted help exit signal, data = {self.format_help()}")
-        ...
 
-    def add_rescue_param(self, name: str, validate_type) -> NoReturn:
+    def add_rescue_param(self, name: str, validate_type=None) -> NoReturn:
         """
         Adds a positional Rescue parsing group
 
         Args:
             name(str): name of the positional argument
             validate_type(Any): Type to validate the argument as
-"""
+        """
         self.add_argument(name, type=validate_type)
 
-
-def add_rescue_parsing_group(parser: ArgumentParser, name: str, validate_type) -> NoReturn:
-    """
-    Adds a positional Rescue parsing group
-    Args:
-        parser (ArgumentParser): Parser to add the group too
-        name(str): name of the positional argument
-        validate_type(Any): Type to validate the argument as
-
-    Returns:
-
-    """
-    parser.add_argument(name, type=validate_type)
