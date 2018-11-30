@@ -14,13 +14,13 @@ Index = int
 Name = str
 
 # typeVars (OK For Export)
-RescueType = TypeVar('RescueType', int, Name, UUID)  # Rescue type
-RatType = TypeVar("RatType", '_Platforms', str, UUID)  # rat type
+RescueType = TypeVar('RescueType', Index, Name, UUID)  # Rescue type
+RatType = TypeVar("RatType", '_Platforms', Name, UUID)  # rat type
 
 
 class Rescue(Generic[RescueType], _Rescue):
     """
-    Rescue type parameter, for use with @parametrize
+    Rescue type parameter, for use with `@parametrize`
 
     Functions using this hint will have an argument block added to it to find a Rescue from the
     context by the parametrize decorator
@@ -31,6 +31,13 @@ class Rescue(Generic[RescueType], _Rescue):
 
     Parametrize will create a positional argument group for the argument.
     This group accepts a String commander name, a integer case index, or a UUID
+
+    If it is desirable to restrict /how/ this argument is parametrized, a type can be specified.
+
+    For instance, if we want it to only find Rescues by a specified Commander Name,
+        >>> def foo(rescue:Rescue[Name]):
+        ...     ...
+
 
     Rescues can also be parametrized by their index:
         >>> def foo(rescue:Rescue[Index]):
@@ -45,10 +52,28 @@ class Rescue(Generic[RescueType], _Rescue):
         ...     ...
 
     Please note that the optional filtering types are mutually exclusive, and cannot be mixed.
-
     """
     ...
 
 
 class Rat(Generic[RatType], _Rat):
+    """
+    Rat type parameter, for use with `@parametrize`
+
+    arguments with this type hint will have a Rat argument block added to their CLI invocations.
+
+    Usage:
+        Define a command that accepts a rat object by any method
+            >>> def foo(rat:Rat):
+                ...
+
+        Define a command that accepts a rat only by UUID
+            >>> def foo(rat:Rat[UUID]):
+            ...     ...
+
+        Define a command that accepts a rat only by Name:
+            >>> def foo(rat:Rat[Name]):
+            ...     ...
+
+    """
     ...
