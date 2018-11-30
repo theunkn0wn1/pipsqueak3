@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 Index = int
 Name = str
 
-# typeVars (OK For Export)
+# typeVars (Not for Export)
 RescueType = TypeVar('RescueType', Index, Name, UUID)  # Rescue type
 RatType = TypeVar("RatType", '_Platforms', Name, UUID)  # rat type
 
@@ -65,7 +65,7 @@ class Rat(Generic[RatType], _Rat):
     Usage:
         Define a command that accepts a rat object by any method
             >>> def foo(rat:Rat):
-                ...
+            ...     ...
 
         Define a command that accepts a rat only by UUID
             >>> def foo(rat:Rat[UUID]):
