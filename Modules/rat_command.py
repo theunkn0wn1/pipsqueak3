@@ -127,8 +127,8 @@ def _flush() -> None:
     Flushes registered commands
     Probably useless outside testing...
     """
-    global _registered_commands  # again this feels ugly but they are module-level now...
-    _registered_commands = {}
+
+    _registered_commands.clear()
     clear_rules()
 
 
