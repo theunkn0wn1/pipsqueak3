@@ -16,7 +16,7 @@ from logging import getLogger
 from typing import Any, Callable, Optional
 
 from Modules.context import Context
-from .parsers import ArgumentParser
+from .parsers import ArgumentParser, ParserWantsExit
 
 # set the logger for rat_command
 log = getLogger(f"mecha.{__name__}")
@@ -32,10 +32,11 @@ class Command:
         self._func = func
         self._parser = None
 
-        # call the setter as to avoid duplicating type checks
-        self.parser = parser
+        if parser is not None:
+            # call the setter as to avoid duplicating type checks
+            self.parser = parser
 
-    def __call__(self, context: Context, *args, **kwargs) -> Any:
+    async def __call__(self, context: Context, *args, **kwargs) -> Any:
         """
         Call the underlying function
         """
@@ -44,7 +45,7 @@ class Command:
             namespace = self.parser.parse_args(context.words)
             log.debug(f"namespace={namespace}")
 
-        return self._func(*args, **kwargs)
+        return await self._func(context=context, *args, **kwargs)
 
     @property
     def parser(self) -> Optional[ArgumentParser]:
@@ -55,7 +56,7 @@ class Command:
 
     @parser.setter
     def parser(self, value: Optional[ArgumentParser]):
-        if (value is not None) and not (isinstance(value, ArgumentParser)):
+        if not (isinstance(value, ArgumentParser)):
             raise TypeError(f"expected an instance of ArgumentParser, got {type(value)}")
 
         self._parser = value
