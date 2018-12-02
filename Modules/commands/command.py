@@ -45,12 +45,13 @@ class Command:
             # if we have a registered parser, call it
             if '-h' in context.words:
                 # help condition, bail out
-                return self.parser.format_help()
+                return await context.reply(self.parser.format_help())
 
             # normal invocation, parse the arguments
             namespace = self.parser.parse_args(context.words[1:])
             log.debug(f"namespace={namespace}")
 
+        # todo parse namespace -> target variables
         return await self._func(context=context, *args, **kwargs)
 
     @property
@@ -61,7 +62,7 @@ class Command:
         return self._parser
 
     @parser.setter
-    def parser(self, value: Optional[ArgumentParser]):
+    def parser(self, value: ArgumentParser):
         if not (isinstance(value, ArgumentParser)):
             raise TypeError(f"expected an instance of ArgumentParser, got {type(value)}")
 
