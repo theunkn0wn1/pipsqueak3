@@ -91,7 +91,8 @@ class TestRatCommand(object):
          or why...
         :return:
         """
-        assert Commands._register(garbage, ['foo']) is False
+        with pytest.raises(AssertionError, message="`func` must be callable"):
+            Commands._register(garbage, ['foo'])
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize("alias", ['potato', 'cannon', 'Fodder', "fireball"])

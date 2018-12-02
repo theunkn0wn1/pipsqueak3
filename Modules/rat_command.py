@@ -13,9 +13,7 @@ This module is built on top of the Pydle system.
 """
 
 import logging
-from typing import Callable, Any
-
-from pydle import BasicClient
+from typing import Callable, Any, NoReturn
 
 from Modules.context import Context
 from Modules.rules import get_rule, clear_rules
@@ -93,12 +91,11 @@ async def trigger(ctx) -> Any:
         log.debug(f"Ignoring message '{ctx.words_eol[0]}'. Not a command or rule.")
 
 
-def _register(func, names: list or str) -> bool:
+def _register(func, names: list or str) -> NoReturn:
     """
     Register a new command
     :param func: function
-    :param names: names to register
-    :return: success
+    :param names: names to registerx
     """
     if isinstance(names, str):
         names = [names]  # idiot proofing
@@ -106,20 +103,15 @@ def _register(func, names: list or str) -> bool:
     # transform commands to lowercase
     names = [name.casefold() for name in names]
 
-    if func is None or not callable(func):
-        # command not callable
-        return False
+    assert func is not None and callable(func), "`func` must be callable."
 
-    else:
-        for alias in names:
-            if alias in _registered_commands:
-                # command already registered
-                raise NameCollisionException(f"attempted to re-register command(s) {alias}")
-            else:
-                formed_dict = {alias: func}
-                _registered_commands.update(formed_dict)
-
-        return True
+    for alias in names:
+        if alias in _registered_commands:
+            # command already registered
+            raise NameCollisionException(f"attempted to re-register command(s) {alias}")
+        else:
+            formed_dict = {alias: func}
+            _registered_commands.update(formed_dict)
 
 
 def _flush() -> None:
@@ -152,8 +144,7 @@ def command(*aliases):
             Callable: *func*, unmodified.
         """
         log.debug(f"Registering command aliases: {aliases}...")
-        if not _register(func, aliases):
-            raise InvalidCommandException("unable to register commands.")
+        _register(func, aliases)
         log.debug(f"Registration of {aliases} completed.")
 
         return func
