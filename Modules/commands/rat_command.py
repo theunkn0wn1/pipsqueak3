@@ -89,7 +89,7 @@ async def trigger(ctx) -> Any:
                 f"found.")
 
     if command_fun:
-        return await command_fun(ctx, *extra_args)
+        return await command_fun(context=ctx, *extra_args)
     else:
         log.debug(f"Ignoring message '{ctx.words_eol[0]}'. Not a command or rule.")
 

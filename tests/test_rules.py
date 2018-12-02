@@ -65,8 +65,8 @@ async def test_rule_passes_match(async_callable_fx: AsyncCallableMock, bot_fx):
     await trigger(ctx)
 
     assert async_callable_fx.was_called_once
-    assert async_callable_fx.was_called_with(InstanceOf(Context), InstanceOf(Match))
-    assert async_callable_fx.calls[0].args[1].groups() == ("lo",)
+    assert async_callable_fx.was_called_with(InstanceOf(Match), context=InstanceOf(Context ))
+    assert async_callable_fx.calls[0].args[0].groups() == ("lo",)
 
 
 @pytest.mark.asyncio
@@ -79,7 +79,7 @@ async def test_prefixless_rule_called(async_callable_fx: AsyncCallableMock, bot_
     await trigger(ctx)
 
     assert async_callable_fx.was_called_once
-    assert async_callable_fx.was_called_with(InstanceOf(Context))
+    assert async_callable_fx.was_called_with(context=InstanceOf(Context))
 
 
 @pytest.mark.asyncio
