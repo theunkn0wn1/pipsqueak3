@@ -14,11 +14,14 @@ See LICENSE.md
 """
 from .types import Rescue, Rat, Name, Index
 from .parametrize import parametrize
+from .rat_command import command
+from .types import Rescue, Rat, Name, Index
 
 __all__ = [
     "Rescue",
     "Rat",
     "Name",
     "Index",
-    "parametrize"
+    "parametrize",
+    "command",
 ]

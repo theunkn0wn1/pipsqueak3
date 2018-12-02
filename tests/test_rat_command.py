@@ -17,6 +17,7 @@ This module is built on top of the Pydle system.
 import pydle
 import pytest
 
+import Modules.commands
 import Modules.commands.rat_command as Commands
 from Modules.context import Context
 from Modules.commands.rat_command import NameCollisionException
@@ -109,7 +110,7 @@ class TestRatCommand(object):
             # print(f"bot={bot}\tchannel={channel}\tsender={sender}")
             return bot, channel, sender
 
-        assert alias.lower() in Commands._registered_commands.keys()
+        assert alias.lower() in Modules.commands._registered_commands.keys()
 
     @pytest.mark.asyncio
     async def test_command_decorator_list(self):
@@ -121,7 +122,7 @@ class TestRatCommand(object):
             return bot, channel, sender
 
         for name in aliases:
-            assert name.lower() in Commands._registered_commands.keys()
+            assert name.lower() in Modules.commands._registered_commands.keys()
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize("name", ("unit_test[BOT]", "some_recruit", "some_ov"))
