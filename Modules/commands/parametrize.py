@@ -55,12 +55,18 @@ def parametrize(func: Callable) -> Callable:
 
 
     Valid Examples:
+        >>> from Modules.commands import command
+
+        Note: Parametrize only works for functions decorated as commands
+
         >>> @parametrize
+        ... @command('param_demo-1')
         ... def foo(context:Context, bar: int):
         ...     ...
 
     Invalid Examples:
             >>> @parametrize
+            ... @command('param_demo-2')
             ... def no_context(bar:int):
             ...     ...
             Traceback (most recent call last):
@@ -68,6 +74,7 @@ def parametrize(func: Callable) -> Callable:
             AssertionError: function must accept a context argument.
 
             >>> @parametrize
+            ... @command('param_demo-3')
             ... def foo(context:int, bar:int):
             ...     ...
             Traceback (most recent call last):
@@ -75,6 +82,7 @@ def parametrize(func: Callable) -> Callable:
             AssertionError: the `context` argument must be of type Context.
 
             >>> @parametrize
+            ... @command('param_demo-4')
             ... def no_fun(context:Context, foo:int, bar):
             ...     ...
             Traceback (most recent call last):
