@@ -13,17 +13,18 @@ This module is built on top of the Pydle system.
 """
 
 import logging
-from typing import Callable, Any, NoReturn, Dict
+from typing import Callable, Any, NoReturn, Dict, Union
 
 from Modules.context import Context
 from Modules.rules import get_rule, clear_rules
 from config import config
 from . import Command
 
-_registered_commands: Dict[str, Command] = {}
+_registered_commands: Dict[Union[str, Callable], Command] = {}
 """
-Registered Commands
+Registered Commands by string name reference
 """
+
 # set the logger for rat_command
 log = logging.getLogger(f"mecha.{__name__}")
 
@@ -111,13 +112,14 @@ def _register(func, names: list or str) -> NoReturn:
     # build a Command object to register
 
     cmd = Command(func)
+    _registered_commands[func] = cmd
     for alias in names:
         if alias in _registered_commands:
             # command already registered
             raise NameCollisionException(f"attempted to re-register command(s) {alias}")
         else:
-            formed_dict = {alias: cmd}
-            _registered_commands.update(formed_dict)
+            # append the alias to the list
+            _registered_commands[alias] = cmd
 
 
 def _flush() -> None:

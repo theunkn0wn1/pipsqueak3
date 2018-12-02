@@ -12,16 +12,15 @@ See LICENSE.md
 """
 from inspect import getfullargspec
 from logging import getLogger
-from typing import Callable, Dict
+from typing import Callable
 from uuid import UUID
 
 from Modules.context import Context
+from .rat_command import _registered_commands
 from .parsers import ArgumentParser
 from .types import Rescue
 
 log = getLogger(f"mecha.{__name__}")
-
-registered_parsers: Dict[Callable, ArgumentParser] = {}
 
 
 def parametrize(func: Callable) -> Callable:
@@ -123,6 +122,6 @@ def parametrize(func: Callable) -> Callable:
             parser.add_rescue_param(argument, subtype)
 
     # register the parser
-    registered_parsers[func] = parser
+    _registered_commands[func].parser = parser
     # return the original
     return func
