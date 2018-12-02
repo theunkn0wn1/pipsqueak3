@@ -13,12 +13,17 @@ This module is built on top of the Pydle system.
 """
 
 import logging
-from typing import Callable, Any, NoReturn
+from typing import Callable, Any, NoReturn, Dict
 
 from Modules.context import Context
 from Modules.rules import get_rule, clear_rules
 from config import config
+from . import Command
 
+_registered_commands: Dict[str, Command] = {}
+"""
+Registered Commands
+"""
 # set the logger for rat_command
 log = logging.getLogger(f"mecha.{__name__}")
 
@@ -43,8 +48,6 @@ class NameCollisionException(CommandException):
     """
     pass
 
-
-_registered_commands = {}
 
 # character/s that must prefix a message for it to be parsed as a command.
 prefix = config['commands']['prefix']
@@ -97,20 +100,23 @@ def _register(func, names: list or str) -> NoReturn:
     :param func: function
     :param names: names to registerx
     """
+    assert func is not None and callable(func), "`func` must be callable."
+
     if isinstance(names, str):
         names = [names]  # idiot proofing
 
     # transform commands to lowercase
     names = [name.casefold() for name in names]
 
-    assert func is not None and callable(func), "`func` must be callable."
+    # build a Command object to register
 
+    cmd = Command(func)
     for alias in names:
         if alias in _registered_commands:
             # command already registered
             raise NameCollisionException(f"attempted to re-register command(s) {alias}")
         else:
-            formed_dict = {alias: func}
+            formed_dict = {alias: cmd}
             _registered_commands.update(formed_dict)
 
 

@@ -12,10 +12,12 @@ Licensed under the BSD 3-Clause License.
 
 See LICENSE.md
 """
-from .types import Rescue, Rat, Name, Index
+
+from .command import Command
 from .parametrize import parametrize
-from .rat_command import command
+from .rat_command import command, _registered_commands
 from .types import Rescue, Rat, Name, Index
+
 
 __all__ = [
     "Rescue",
