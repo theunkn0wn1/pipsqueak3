@@ -21,10 +21,10 @@ from pydle import Client
 # noinspection PyUnresolvedReferences
 import commands
 from Modules import graceful_errors
-from Modules.commands import rat_command
+from Modules.commands import command, trigger
 from Modules.context import Context
 from Modules.permissions import require_permission, RAT
-from Modules.commands.rat_command import command
+from Modules.rat_board import RatBoard
 from config import config
 from utils.ratlib import sanitize
 
@@ -52,6 +52,8 @@ class MechaClient(Client):
         self._api_handler = None  # TODO: replace with handler init once it exists
         self._database_manager = None  # TODO: replace with dbm once it exists
         self._rat_cache = None  # TODO: replace with ratcache once it exists
+
+        self._board = RatBoard(handler=self._api_handler)
         super().__init__(*args, **kwargs)
 
     async def on_connect(self):
@@ -94,7 +96,7 @@ class MechaClient(Client):
             log.debug(f"Sanitized {sanitized_message}, Original: {message}")
             try:
                 ctx = await Context.from_message(self, channel, user, message)
-                await rat_command.trigger(ctx)
+                await trigger(ctx)
 
             except Exception as ex:
                 ex_uuid = uuid4()
@@ -123,6 +125,27 @@ class MechaClient(Client):
         Mecha's API connection
         """
         return self._api_handler
+
+    @property
+    def board(self) -> RatBoard:
+        """
+        Rescue board for this MechaClient
+        """
+        return self._board
+
+    @board.setter
+    def board(self, value: RatBoard):
+        if not isinstance(value, RatBoard):
+            raise TypeError(f"expected instance of {RatBoard}, got {type(value)}")
+
+        self._board = value
+
+    @board.deleter
+    def board(self):
+        # destroy the existing board
+        del self._board
+        # set the attribute back to None
+        self._board = None
 
 
 @require_permission(RAT)
@@ -164,6 +187,7 @@ async def start():
                          )
 
     log.info("Connected to IRC.")
+
 
 # entry point
 if __name__ == "__main__":
