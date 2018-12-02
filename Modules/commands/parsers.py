@@ -14,7 +14,8 @@ See LICENSE.md
 """
 from argparse import ArgumentParser as QuittingArgumentParser
 from logging import getLogger
-from typing import NoReturn
+from typing import NoReturn, Type
+from uuid import UUID
 
 log = getLogger(f"mecha.{__name__}")
 
@@ -48,13 +49,21 @@ class ArgumentParser(QuittingArgumentParser):
     def print_help(self, file=None):
         log.debug(f"intercepted help exit signal, data = {self.format_help()}")
 
-    def add_rescue_param(self, name: str, validate_type=None) -> NoReturn:
+    def add_rescue_param(self, name: str, validate_type: Type = None) -> NoReturn:
         """
         Adds a positional Rescue parsing group
 
         Args:
             name(str): name of the positional argument
-            validate_type(Any): Type to validate the argument as
+            validate_type(Type): Type to validate the argument as
         """
-        self.add_argument(name, type=validate_type)
 
+        help_str = "irc name of client, the API uuid, or the board index of the Rescue."
+
+        if validate_type is str:
+            help_str = "irc name of the client"
+        elif validate_type is UUID:
+            help_str = "API id of rescue"
+        elif validate_type is int:
+            help_str = "board number of Rescue"
+        self.add_argument(name, type=validate_type, help=help_str)
