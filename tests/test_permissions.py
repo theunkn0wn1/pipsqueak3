@@ -18,7 +18,7 @@ from typing import Set
 
 import pytest
 
-import Modules.rat_command as Commands
+import Modules.commands.rat_command as Commands
 from Modules import permissions
 from Modules.context import Context
 from Modules.permissions import require_permission, require_channel, require_dm, Permission

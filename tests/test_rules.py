@@ -2,8 +2,8 @@ from typing import Match
 
 import pytest
 
-from Modules.context import Context, _split_message
-from Modules.rat_command import trigger
+from Modules.context import Context
+from Modules.commands.rat_command import trigger
 from Modules.rules import rule, clear_rules, RuleNotPresentException, DuplicateRuleException, \
     get_rule
 from tests.mock_callables import AsyncCallableMock, InstanceOf, CallableMock
