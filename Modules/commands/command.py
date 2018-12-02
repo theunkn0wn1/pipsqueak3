@@ -42,7 +42,13 @@ class Command:
         """
 
         if self.parser:
-            namespace = self.parser.parse_args(context.words)
+            # if we have a registered parser, call it
+            if '-h' in context.words:
+                # help condition, bail out
+                return self.parser.format_help()
+
+            # normal invocation, parse the arguments
+            namespace = self.parser.parse_args(context.words[1:])
             log.debug(f"namespace={namespace}")
 
         return await self._func(context=context, *args, **kwargs)
