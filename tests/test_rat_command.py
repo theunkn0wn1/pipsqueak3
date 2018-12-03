@@ -19,15 +19,14 @@ import pytest
 
 import Modules.commands
 import Modules.commands.rat_command as Commands
-from Modules.context import Context
 from Modules.commands.rat_command import NameCollisionException
+from Modules.context import Context
 
 
 @pytest.fixture
 def Setup_fx(bot_fx):
     """Sets up the test environment"""
     Commands._flush()
-    Commands.bot = bot_fx
 
 
 @pytest.mark.commands
