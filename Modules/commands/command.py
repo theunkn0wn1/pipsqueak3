@@ -16,10 +16,9 @@ from logging import getLogger
 from typing import Any, Callable, Optional
 from uuid import UUID
 
-from Modules.commands.parsers import ParserError
 from Modules.context import Context
-from .parsers import ArgumentParser
-from .types import Rescue, Name
+from .parsers import ArgumentParser, ParserError
+from .types import Rescue, Name, Rat, Index
 
 # set the logger for rat_command
 log = getLogger(f"mecha.{__name__}")
@@ -41,7 +40,7 @@ class Command:
 
     async def __call__(self, context: Context, *args, **kwargs) -> Any:
         """
-        Call the underlying function
+        Parametrize the arguments and call the underlying function
         """
 
         if self.parser:
@@ -69,7 +68,7 @@ class Command:
                 if value_type is Rescue[None]:
                     # any rescue
                     kwargs[name] = context.bot.board.search(value)
-                elif value_type is Rescue[int]:
+                elif value_type is Rescue[Index]:
                     # rescue by board index
                     kwargs[name] = context.bot.board.find_by_index(value)
 
