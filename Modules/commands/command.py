@@ -14,9 +14,11 @@ See LICENSE.md
 
 from logging import getLogger
 from typing import Any, Callable, Optional
+from uuid import UUID
 
 from Modules.context import Context
-from .parsers import ArgumentParser, ParserWantsExit
+from .parsers import ArgumentParser
+from .types import Rescue
 
 # set the logger for rat_command
 log = getLogger(f"mecha.{__name__}")
@@ -50,6 +52,20 @@ class Command:
             # normal invocation, parse the arguments
             namespace = self.parser.parse_args(context.words[1:])
             log.debug(f"namespace={namespace}")
+
+            for name, value_type in self.parser._types.items():
+                value = getattr(namespace, name)
+
+                if value_type is Rescue[None]:
+                    # any rescue type
+                    kwargs[name] = context.bot.board.search(value)
+                elif value_type is Rescue[int]:
+                    # board index
+                    kwargs[name] = context.bot.board.find_by_index(value)
+
+                elif value_type is Rescue[UUID]:
+                    # by uuid
+                    kwargs[name] = context.bot.board.find_by_uuid(value)
 
         # todo parse namespace -> target variables
         return await self._func(context=context, *args, **kwargs)
