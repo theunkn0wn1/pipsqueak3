@@ -25,15 +25,15 @@ class RatCache(Singleton):
     A cache of rat objects
     """
 
-    def __init__(self, api_handler=None):
+    def __init__(self):
         """
         Creates the ratcache
         """
-        if not hasattr(self, "_initalized"):
-            self._initalized = True
+        if not hasattr(self, "_initialized"):
+            self._initialized = True
             self._cache_by_id: Dict[UUID, 'Rat'] = {}
             self._cache_by_name: Dict[str, 'Rat'] = {}
-            self._api_handler = api_handler
+            self._api_handler = None
 
     @property
     def api_handler(self):
