@@ -13,8 +13,9 @@ See LICENSE.md
 """
 import logging
 
+from Modules.commands import command, parametrize, Rescue
+from Modules.context import Context
 from Modules.permissions import require_permission, TECHRAT, require_channel
-from Modules.commands.rat_command import command
 
 log = logging.getLogger(f"mecha.{__name__}")
 
@@ -31,3 +32,9 @@ async def cmd_debug_whois(context):
     data = await context.bot.whois(context.words[1])
     log.debug(data)
     await context.reply(f"{data}")
+
+
+@parametrize
+@command('debug-ping')
+async def potato(context: Context, foo: Rescue):
+    await context.reply("pong!")
