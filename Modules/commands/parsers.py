@@ -14,8 +14,10 @@ See LICENSE.md
 """
 from argparse import ArgumentParser as QuittingArgumentParser
 from logging import getLogger
-from typing import NoReturn, Type
+from typing import NoReturn, Type, Dict, List
 from uuid import UUID
+
+from .types import Rescue, Name, Index
 
 log = getLogger(f"mecha.{__name__}")
 
@@ -35,6 +37,11 @@ class ParserWantsExit(ParserError):
 
 class ArgumentParser(QuittingArgumentParser):
 
+    def __init__(self, *args, **kwargs):
+        self._types: Dict[str, Type] = {}
+        """mapping between positional arguments and their parametrized types"""
+        super().__init__(*args, **kwargs)
+
     # TODO: help support
     def error(self, message: str) -> NoReturn:
         log.debug(f"intercepted attempt to exit. message={message}")
@@ -49,7 +56,7 @@ class ArgumentParser(QuittingArgumentParser):
     def print_help(self, file=None):
         log.debug(f"intercepted help exit signal, data = {self.format_help()}")
 
-    def add_rescue_param(self, name: str, validate_type: Type = None) -> NoReturn:
+    def add_rescue_param(self, name: str, validate_type: Type = None):
         """
         Adds a positional Rescue parsing group
 
@@ -57,13 +64,19 @@ class ArgumentParser(QuittingArgumentParser):
             name(str): name of the positional argument
             validate_type(Type): Type to validate the argument as
         """
-
-        help_str = "irc name of client, the API uuid, or the board index of the Rescue."
-
-        if validate_type is str:
+        if validate_type is None:  # no subtype
+            help_str = "irc name of client, the API uuid, or the case number of the Rescue."
+        elif validate_type is Name:  # name subtype
             help_str = "irc name of the client"
-        elif validate_type is UUID:
+        elif validate_type is UUID:  # api id subtype
             help_str = "API id of rescue"
-        elif validate_type is int:
-            help_str = "board number of Rescue"
-        self.add_argument(name, type=validate_type, help=help_str)
+        elif validate_type is Index:  # case number subtype
+            help_str = "case number of Rescue"
+
+        else:
+            raise ValueError(f"unknown Rescue subtype {type(validate_type)}")
+
+        # append argument to the types variable
+        self._types[name] = Rescue[validate_type]
+
+        return self.add_argument(name, type=validate_type, help=help_str)
