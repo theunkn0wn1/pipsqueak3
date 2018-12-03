@@ -97,6 +97,7 @@ def parametrize(func: Callable) -> Callable:
     # Sanity checks
     # ######
     assert "context" in spec.args, "function must accept a context argument."
+    assert "context" in spec.annotations, "the `context` argument must have a type hint."
     assert spec.annotations['context'] is Context, "the `context` argument must be of type Context."
 
     # build a list of arguments except for context
