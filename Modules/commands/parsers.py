@@ -38,7 +38,7 @@ class ParserWantsExit(ParserError):
 class ArgumentParser(QuittingArgumentParser):
 
     def __init__(self, *args, **kwargs):
-        self._types: Dict[str, Type] = {}
+        self._parametrized_args: Dict[str, Type] = {}
         """mapping between positional arguments and their parametrized types"""
         super().__init__(*args, **kwargs)
 
@@ -77,6 +77,6 @@ class ArgumentParser(QuittingArgumentParser):
             raise ValueError(f"unknown Rescue subtype {type(validate_type)}")
 
         # append argument to the types variable
-        self._types[name] = Rescue[validate_type]
+        self._parametrized_args[name] = Rescue[validate_type]
 
         return self.add_argument(name, type=validate_type, help=help_str)
