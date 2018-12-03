@@ -14,6 +14,7 @@ This module is built on top of the Pydle system.
 """
 import asyncio
 import logging
+from typing import NoReturn
 from uuid import uuid4
 
 from pydle import Client
@@ -25,6 +26,7 @@ from Modules.commands import command, trigger
 from Modules.context import Context
 from Modules.permissions import require_permission, RAT
 from Modules.rat_board import RatBoard
+from Modules.rat_cache import RatCache
 from config import config
 from utils.ratlib import sanitize
 
@@ -53,7 +55,8 @@ class MechaClient(Client):
         self._database_manager = None  # TODO: replace with dbm once it exists
         self._rat_cache = None  # TODO: replace with ratcache once it exists
 
-        self._board = RatBoard(handler=self._api_handler)
+        self._board = RatBoard(handler=self.api_handler)
+        self._rat_cache = RatCache()
         super().__init__(*args, **kwargs)
 
     async def on_connect(self):
@@ -105,12 +108,6 @@ class MechaClient(Client):
                 # and report it to the user
                 await self.message(channel, error_message)
 
-    @property
-    def rat_cache(self) -> object:
-        """
-        Mecha's rat cache
-        """
-        return self._rat_cache
 
     @property
     def database_mgr(self) -> object:
@@ -146,6 +143,23 @@ class MechaClient(Client):
         del self._board
         # set the attribute back to None
         self._board = None
+
+    @property
+    def rat_cache(self) -> RatCache:
+        return self._rat_cache
+
+    @rat_cache.setter
+    def rat_cache(self, value: RatCache) -> NoReturn:
+        if not isinstance(value, RatCache):
+            raise TypeError(f"expected an instance of {RatCache}, got {type(RatCache)}")
+
+    @rat_cache.deleter
+    def rat_cache(self) -> NoReturn:
+        # purge the existing cache
+        del self._rat_cache
+        # and create a new one
+        self._rat_cache = RatCache()
+        self.rat_cache.api_handler = self.api_handler
 
 
 @require_permission(RAT)
