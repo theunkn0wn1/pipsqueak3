@@ -125,7 +125,11 @@ def parametrize(func: Callable) -> Callable:
             # use an ugly hack to get the specified sub-type. Im not happy i need to touch a magic
             # here but its not publicly exposed and im NOT subclassing (move the shit elsewhere).
             # suggestions on how to access the subtype more clearly are welcome.
-            subtype = annotation.__args__[0] if annotation.__args__ else None
+
+            if annotation is Rescue:
+                subtype = None
+            else:
+                subtype = annotation.__args__[0]
 
             log.debug(f"adding parser group by the name {argument} with subtype {subtype}...")
             parser.add_rescue_param(argument, subtype)
