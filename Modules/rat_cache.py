@@ -11,7 +11,7 @@ Licensed under the BSD 3-Clause License.
 
 See LICENSE.md
 """
-from typing import Dict, Optional, TYPE_CHECKING
+from typing import Dict, Optional, TYPE_CHECKING, Union
 from uuid import UUID
 
 from utils.ratlib import Platforms, Singleton
@@ -150,6 +150,14 @@ class RatCache(Singleton):
                 found = await self.api_handler.get_rat_by_id(id=uuid)
 
             return found
+
+    async def get_rat(self, target: Union[str, UUID]):
+        if isinstance(target, UUID):
+            return await self.get_rat_by_uuid(target)
+        elif isinstance(target, str):
+            return await self.get_rat_by_name(target)
+        else:
+            raise TypeError
 
     def flush(self) -> None:
         """
