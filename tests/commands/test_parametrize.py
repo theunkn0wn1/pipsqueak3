@@ -12,7 +12,7 @@ See LICENSE.md
 """
 from pytest import mark, fixture
 
-from Modules.commands import command, parametrize, Rescue, trigger
+from Modules.commands import command, parametrize, Rescue as _Rescue, trigger
 from Modules.commands.rat_command import _flush, prefix
 from Modules.context import Context
 
@@ -33,17 +33,15 @@ async def test_rescue_int(bot_fx, rescue_sop_fx):
 
     @parametrize
     @command('foo')
-    async def cmd_foo(context: Context, bar: Rescue[int]):
-        return 42
-
+    async def cmd_foo(context: Context, bar: _Rescue[int]):
+        return bar
 
     ctx = await Context.from_message(bot_fx, "#unit_test", 'some_ov',
-                               f"{prefix}foo {rescue_sop_fx.board_index}")
+                                     f"{prefix}foo {rescue_sop_fx.board_index}")
 
     retn = await trigger(ctx)
 
-    pass
-
+    assert retn is rescue_sop_fx
 
 
 @mark.usefixtures('Setup_fx')
@@ -54,13 +52,15 @@ async def test_rescue_help(bot_fx, rescue_sop_fx):
 
     @parametrize
     @command('foo')
-    async def cmd_foo(context: Context, bar: Rescue[int]):
+    async def cmd_foo(context: Context, bar: _Rescue[int]):
         return 42
 
-
+    bot_fx.sent_messages.clear()
     ctx = await Context.from_message(bot_fx, "#unit_test", 'some_ov',
-                               f"{prefix}foo -h")
+                                     f"{prefix}foo -h")
 
     retn = await trigger(ctx)
 
-    pass
+    assert retn is None
+    # assert a message got emitted
+    assert bot_fx.sent_messages

@@ -19,7 +19,7 @@ from uuid import UUID
 from Modules.context import Context
 from Modules.rat_rescue import Rescue as _Rescue
 from .parsers import ArgumentParser, ParserError
-from .types import Rescue, Name, Rat, Index
+from .types import Rescue, Name, Rat, Index, Word
 
 # set the logger for rat_command
 log = getLogger(f"mecha.{__name__}")
@@ -65,7 +65,7 @@ class Command:
                 target = getattr(namespace, name)
                 # ugly case/switch style block is ugly
                 # if the Rescue is a plain Rescue type, just search
-                if value_type is Rescue[None] or value_type is _Rescue:
+                elif value_type in [Rescue[None], _Rescue]:
                     # any rescue
                     kwargs[name] = context.bot.board.search(target)
 

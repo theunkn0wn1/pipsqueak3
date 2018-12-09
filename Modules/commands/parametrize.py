@@ -16,9 +16,11 @@ from typing import Callable
 from uuid import UUID
 
 from Modules.context import Context
-from .rat_command import _registered_commands
+from Modules.rat import Rat as _Rat
+from Modules.rat_rescue import Rescue as _Rescue
 from .parsers import ArgumentParser
-from .types import Rescue
+from .rat_command import _registered_commands
+from .types import Rescue, Rat, Name
 
 log = getLogger(f"mecha.{__name__}")
 
@@ -121,18 +123,28 @@ def parametrize(func: Callable) -> Callable:
         annotation = spec.annotations[argument]
 
         # check if we have a Rescue type
-        if annotation in [Rescue, Rescue[int], Rescue[str], Rescue[UUID]]:
+        if annotation in [Rescue, Rescue[int], Rescue[str], Rescue[UUID], _Rescue]:
             # use an ugly hack to get the specified sub-type. Im not happy i need to touch a magic
             # here but its not publicly exposed and im NOT subclassing (move the shit elsewhere).
             # suggestions on how to access the subtype more clearly are welcome.
 
-            if annotation is Rescue:
+            if annotation in [Rescue, _Rescue]:
                 subtype = None
             else:
                 subtype = annotation.__args__[0]
 
-            log.debug(f"adding parser group by the name {argument} with subtype {subtype}...")
+            log.debug(f"adding Rescue parser group by the name {argument} with subtype {subtype}...")
             parser.add_rescue_param(argument, subtype)
+
+        elif annotation in [Rat, _Rat, Rat[UUID], Rat[Name]]:
+            if annotation in [Rat, _Rat]:
+                subtype = None
+            else:
+                subtype = annotation.__args__[0]
+            log.debug(f"adding Rat parser group by the name {argument} with subtype {subtype}...")
+            parser.add_rescue_param(argument, subtype)
+
+
 
     # register the parser
     _registered_commands[func].parser = parser
