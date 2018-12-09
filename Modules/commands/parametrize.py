@@ -123,7 +123,7 @@ def parametrize(func: Callable) -> Callable:
         annotation = spec.annotations[argument]
 
         # check if we have a Rescue type
-        if annotation in [Rescue, Rescue[int], Rescue[str], Rescue[UUID], _Rescue]:
+        if annotation in [Rescue, Rescue[int], Rescue[str], Rescue[UUID], _Rescue, Rescue[type(None)]]:
             # use an ugly hack to get the specified sub-type. Im not happy i need to touch a magic
             # here but its not publicly exposed and im NOT subclassing (move the shit elsewhere).
             # suggestions on how to access the subtype more clearly are welcome.
@@ -143,6 +143,9 @@ def parametrize(func: Callable) -> Callable:
                 subtype = annotation.__args__[0]
             log.debug(f"adding Rat parser group by the name {argument} with subtype {subtype}...")
             parser.add_rescue_param(argument, subtype)
+
+        else:
+            raise RuntimeError
 
 
 

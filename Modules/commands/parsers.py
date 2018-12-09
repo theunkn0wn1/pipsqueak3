@@ -64,7 +64,7 @@ class ArgumentParser(QuittingArgumentParser):
             name(str): name of the positional argument
             validate_type(Type): Type to validate the argument as
         """
-        if validate_type is None:  # no subtype
+        if validate_type is None or type(None):  # no subtype
             help_str = "irc name of client, the API uuid, or the case number of the Rescue."
         elif validate_type is Name:  # name subtype
             help_str = "irc name of the client"
@@ -74,7 +74,7 @@ class ArgumentParser(QuittingArgumentParser):
             help_str = "case number of Rescue"
 
         else:
-            raise ValueError(f"unknown Rescue subtype {type(validate_type)}")
+            raise ValueError(f"unknown Rescue subtype {validate_type}")
 
         # append argument to the types variable
         self._parametrized_args[name] = Rescue[validate_type]

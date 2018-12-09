@@ -69,7 +69,7 @@ class Command:
                     # a single word
                     kwargs[name] = target
                 # if the Rescue is a plain Rescue type, just search
-                elif value_type in [Rescue[None], _Rescue]:
+                elif value_type in [Rescue[type(None)], _Rescue]:
                     # any rescue
                     kwargs[name] = context.bot.board.search(target)
 
