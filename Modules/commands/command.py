@@ -16,11 +16,11 @@ from logging import getLogger
 from typing import Any, Callable, Optional
 from uuid import UUID
 
-
+from argparse import REMAINDER
 from Modules.context import Context
 from Modules.rat_rescue import Rescue as _Rescue
 from .parsers import ArgumentParser, ParserError
-from .types import Rescue, Name, Rat, Index, Word, Remainder
+from .types import Rescue, Name, Rat, Index, Word
 
 # set the logger for rat_command
 log = getLogger(f"mecha.{__name__}")
@@ -66,7 +66,7 @@ class Command:
                 target = getattr(namespace, name)
                 # ugly case/switch style block is ugly
 
-                if value_type in [Word, int, Remainder]:
+                if value_type in [Word, int, REMAINDER]:
                     # simple types
                     kwargs[name] = target
                 # if the Rescue is a plain Rescue type, just search

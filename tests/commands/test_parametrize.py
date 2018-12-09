@@ -12,9 +12,9 @@ See LICENSE.md
 """
 from uuid import UUID
 
-from pytest import mark, fixture
-
-from Modules.commands import command, parametrize, Rescue as _Rescue, trigger, Name, Word, Remainder
+from pytest import mark, fixture, raises
+from argparse import REMAINDER
+from Modules.commands import command, parametrize, Rescue as _Rescue, trigger, Name, Word
 from Modules.commands.rat_command import _flush, prefix
 from Modules.context import Context
 from Modules.rat_rescue import Rescue
@@ -162,7 +162,7 @@ async def test_word_multiple(bot_fx):
 async def test_remainder(bot_fx):
     @parametrize
     @command('wordy')
-    async def cmd_wordy(context: Context, foo: Remainder):
+    async def cmd_wordy(context: Context, foo: REMAINDER):
         # a `str` type is intentionally thrown in here to prove the type alias behaves properly
         return foo
 
@@ -172,3 +172,13 @@ async def test_remainder(bot_fx):
     retn = await trigger(ctx)
 
     assert retn == "i am a potato?!".split(' ')
+
+
+@mark.usefixtures("Setup_fx")
+@mark.asyncio
+async def test_parametrize_bad_remainder_order():
+    with raises(AssertionError):
+        @parametrize
+        @command("cmd_failure")
+        async def cmd_failure(context: Context, remainder: REMAINDER, word: Word):
+            ...

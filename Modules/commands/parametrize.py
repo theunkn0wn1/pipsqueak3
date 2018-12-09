@@ -21,7 +21,7 @@ from Modules.rat import Rat as _Rat
 from Modules.rat_rescue import Rescue as _Rescue
 from .parsers import ArgumentParser
 from .rat_command import _registered_commands
-from .types import Rescue, Rat, Name, Word, Remainder
+from .types import Rescue, Rat, Name, Word
 
 log = getLogger(f"mecha.{__name__}")
 
@@ -109,6 +109,11 @@ def parametrize(func: Callable) -> Callable:
     for arg in arguments:
         assert arg in spec.annotations, f"argument {arg} **must** have a defined type."
 
+    # if remainder is in our annotations
+    if REMAINDER in spec.annotations.values():
+        # assert it was the last argument. This prevents funky misbehavior
+        assert spec.annotations[arguments[-1]] == REMAINDER, "the remainder argument *must* be last"
+
     # make a parser for the func, and use the func's name for the parser
     parser = ArgumentParser(prog=func.__name__)
 
@@ -157,12 +162,12 @@ def parametrize(func: Callable) -> Callable:
             log.debug(f"adding Rat parser group by the name {argument} with subtype {subtype}...")
             parser.add_rescue_param(argument, subtype)
 
-        elif annotation is Remainder:
+        elif annotation is REMAINDER:
             log.debug(f"Adding Remainder parser group...")
 
             parser.add_argument(argument, nargs=REMAINDER, help=SUPPRESS)
 
-            parser._parametrized_args[argument] = Remainder
+            parser._parametrized_args[argument] = REMAINDER
         else:
             raise NotImplementedError(f"unknown annotation {annotation}")
 

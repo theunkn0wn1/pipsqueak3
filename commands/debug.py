@@ -12,8 +12,9 @@ Licensed under the BSD 3-Clause License.
 See LICENSE.md
 """
 import logging
+from argparse import REMAINDER
 
-from Modules.commands import command, parametrize, Rescue
+from Modules.commands import command, parametrize, Rescue, Word
 from Modules.context import Context
 from Modules.permissions import require_permission, TECHRAT, require_channel
 
@@ -38,3 +39,9 @@ async def cmd_debug_whois(context):
 @command('debug-ping')
 async def potato(context: Context, foo: Rescue):
     await context.reply("pong!")
+
+
+@parametrize
+@command('wordy')
+async def cmd_wordy(context: Context, foo: Word, snafu: Word, bar: REMAINDER):
+    await context.reply(f"first word:= {foo}\t remaining words:{bar}")
