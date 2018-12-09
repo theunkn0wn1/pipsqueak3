@@ -10,6 +10,7 @@ Licensed under the BSD 3-Clause License.
 
 See LICENSE.md
 """
+from argparse import SUPPRESS, REMAINDER
 from inspect import getfullargspec
 from logging import getLogger
 from typing import Callable
@@ -159,7 +160,7 @@ def parametrize(func: Callable) -> Callable:
         elif annotation is Remainder:
             log.debug(f"Adding Remainder parser group...")
 
-            parser.add_argument(argument, nargs='*')
+            parser.add_argument(argument, nargs=REMAINDER, help=SUPPRESS)
 
             parser._parametrized_args[argument] = Remainder
         else:
