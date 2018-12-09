@@ -14,10 +14,10 @@ See LICENSE.md
 """
 from argparse import ArgumentParser as QuittingArgumentParser
 from logging import getLogger
-from typing import NoReturn, Type, Dict, List
+from typing import NoReturn, Type, Dict, Optional
 from uuid import UUID
 
-from .types import Rescue, Name, Index
+from .types import Rescue, Name, Index, _RatType
 
 log = getLogger(f"mecha.{__name__}")
 
@@ -79,4 +79,27 @@ class ArgumentParser(QuittingArgumentParser):
         # append argument to the types variable
         self._parametrized_args[name] = Rescue[validate_type]
 
+        return self.add_argument(name, type=validate_type, help=help_str)
+
+    def add_rat_param(self, name: str, validate_type: Optional[_RatType]):
+        """
+        Appends a Rat parser group.
+
+        Args:
+            name (str): argument Name
+            validate_type (_RatType): validation type
+
+        Returns:
+
+        """
+        if validate_type is None:
+            help_str = "Name of rat, or its rat id"
+        elif validate_type is Name:
+            help_str = "Name of rat"
+        elif validate_type is UUID:
+            help_str = "api id of rat"
+        else:
+            raise ValueError(f"unknown Rat subtype {type(validate_type)}")
+
+        self._parametrized_args[name] = _RatType[validate_type]
         return self.add_argument(name, type=validate_type, help=help_str)

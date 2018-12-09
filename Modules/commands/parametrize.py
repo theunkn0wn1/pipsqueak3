@@ -102,7 +102,7 @@ def parametrize(func: Callable) -> Callable:
 
     # build a list of arguments except for context
     arguments = [argument for argument in spec.args if argument != "context"]
-    # assert sanity
+    # types must be defined, assert sanity
     for arg in arguments:
         assert arg in spec.annotations, f"argument {arg} **must** have a defined type."
 

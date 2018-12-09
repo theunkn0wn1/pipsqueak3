@@ -17,6 +17,7 @@ from typing import Any, Callable, Optional
 from uuid import UUID
 
 from Modules.context import Context
+from Modules.rat_rescue import Rescue as _Rescue
 from .parsers import ArgumentParser, ParserError
 from .types import Rescue, Name, Rat, Index
 
@@ -56,29 +57,38 @@ class Command:
                 # something went wrong during parsing, reply the error message
                 await context.reply(exc.args[0])
                 return
-            log.debug(f"namespace={namespace}")
 
+            log.debug(f"namespace={namespace}")
             # iterate over the parametrized arguments
             for name, value_type in self.parser._parametrized_args.items():
-
                 # get the parsed value
-                value = getattr(namespace, name)
-
+                target = getattr(namespace, name)
                 # ugly case/switch style block is ugly
-                if value_type is Rescue[None]:
+                # if the Rescue is a plain Rescue type, just search
+                if value_type is Rescue[None] or value_type is _Rescue:
                     # any rescue
-                    kwargs[name] = context.bot.board.search(value)
+                    kwargs[name] = context.bot.board.search(target)
+
                 elif value_type is Rescue[Index]:
                     # rescue by board index
-                    kwargs[name] = context.bot.board.find_by_index(value)
+                    kwargs[name] = context.bot.board.find_by_index(target)
 
                 elif value_type is Rescue[Name]:
                     # rescue by client name
-                    kwargs[name] = context.bot.board.find_by_name(value)
+                    kwargs[name] = context.bot.board.find_by_name(target)
 
                 elif value_type is Rescue[UUID]:
                     # rescue by uuid
-                    kwargs[name] = context.bot.board.find_by_uuid(value)
+                    kwargs[name] = context.bot.board.find_by_uuid(target)
+
+                elif value_type is Rat:
+                    kwargs[name] = await context.bot.rat_cache.get_rat(target)
+
+                elif value_type is Rat[UUID]:
+                    kwargs[name] = await context.bot.rat_cache.get_rat_by_uuid(target)
+
+                elif value_type is Rat[Name]:
+                    kwargs[name] = await context.bot.rat_cache.get_rat_by_name(target)
 
                 ...
 
