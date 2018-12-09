@@ -1,4 +1,4 @@
-from typing import TypeVar, Generic
+from typing import TypeVar, Generic, List
 from uuid import UUID
 
 from Modules.rat import Rat as _Rat
@@ -8,6 +8,11 @@ from Modules.rat_rescue import Rescue as _Rescue
 Index = int
 Name = str
 Word = str
+# typeVars (OK for export)
+Remainder = TypeVar("Remainder", bound=List[str])
+"""
+Any remaining unprocessed words, this argument should come last
+"""
 
 # typeVars (Not for Export)
 _RescueType = TypeVar("_RescueType", _Rescue, Index, Name, UUID)  # Rescue type

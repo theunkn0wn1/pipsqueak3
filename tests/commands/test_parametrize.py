@@ -14,7 +14,7 @@ from uuid import UUID
 
 from pytest import mark, fixture
 
-from Modules.commands import command, parametrize, Rescue as _Rescue, trigger, Name, Word
+from Modules.commands import command, parametrize, Rescue as _Rescue, trigger, Name, Word, Remainder
 from Modules.commands.rat_command import _flush, prefix
 from Modules.context import Context
 from Modules.rat_rescue import Rescue
@@ -148,10 +148,27 @@ async def test_word_multiple(bot_fx):
         return a, b, c, d
 
     ctx = await Context.from_message(bot_fx, "#unit_test", 'some_ov',
-                                     f"{prefix}wordy i am a potato!")
+                                     f"{prefix}wordy i am a potato?!")
 
     retn = await trigger(ctx)
 
-    assert retn == ("i", "am", "a", "potato!")
+    assert retn == ("i", "am", "a", "potato?!")
     # prove order is preserved
-    assert retn != ("am", "i", 'a', "potato!")
+    assert retn != ("am", "i", 'a', "potato?!")
+
+
+@mark.usefixtures("Setup_fx")
+@mark.asyncio
+async def test_remainder(bot_fx):
+    @parametrize
+    @command('wordy')
+    async def cmd_wordy(context: Context, foo: Remainder):
+        # a `str` type is intentionally thrown in here to prove the type alias behaves properly
+        return foo
+
+    ctx = await Context.from_message(bot_fx, "#unit_test", 'some_ov',
+                                     f"{prefix}wordy i am a potato?!")
+
+    retn = await trigger(ctx)
+
+    assert retn == "i am a potato?!".split(' ')

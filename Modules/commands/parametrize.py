@@ -20,7 +20,7 @@ from Modules.rat import Rat as _Rat
 from Modules.rat_rescue import Rescue as _Rescue
 from .parsers import ArgumentParser
 from .rat_command import _registered_commands
-from .types import Rescue, Rat, Name, Word
+from .types import Rescue, Rat, Name, Word, Remainder
 
 log = getLogger(f"mecha.{__name__}")
 
@@ -156,8 +156,14 @@ def parametrize(func: Callable) -> Callable:
             log.debug(f"adding Rat parser group by the name {argument} with subtype {subtype}...")
             parser.add_rescue_param(argument, subtype)
 
+        elif annotation is Remainder:
+            log.debug(f"Adding Remainder parser group...")
+
+            parser.add_argument(argument, nargs='*')
+
+            parser._parametrized_args[argument] = Remainder
         else:
-            raise RuntimeError
+            raise NotImplementedError(f"unknown annotation {annotation}")
 
     # register the parser
     _registered_commands[func].parser = parser
