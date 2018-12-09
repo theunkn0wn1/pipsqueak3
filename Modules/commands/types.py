@@ -1,24 +1,19 @@
-from typing import TypeVar, Generic, TYPE_CHECKING, Union
+from typing import TypeVar, Generic
 from uuid import UUID
 
-from Modules.rat_rescue import Rescue as _Rescue
-
 from Modules.rat import Rat as _Rat
-if TYPE_CHECKING:
-    # noinspection PyUnresolvedReferences
-    from utils.ratlib import Platforms as _Platforms
-
+from Modules.rat_rescue import Rescue as _Rescue
 
 # typedefs to builtin types (OK For export)
 Index = int
 Name = str
 
 # typeVars (Not for Export)
-RescueType = TypeVar('RescueType', Index, Name, UUID)  # Rescue type
-RatType = TypeVar("RatType", '_Platforms', Name, UUID)  # rat type
+_RescueType = TypeVar("_RescueType", _Rescue, Index, Name, UUID)  # Rescue type
+_RatType = TypeVar("_RatType", Name, UUID, _Rat)  # rat type
 
 
-class Rescue(Generic[RescueType], _Rescue):
+class Rescue(Generic[_RescueType], _Rescue):
     """
     Rescue type parameter, for use with `@parametrize`
 
@@ -56,7 +51,7 @@ class Rescue(Generic[RescueType], _Rescue):
     ...
 
 
-class Rat(Generic[RatType], _Rat):
+class Rat(Generic[_RatType], _Rat):
     """
     Rat type parameter, for use with `@parametrize`
 
