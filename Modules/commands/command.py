@@ -64,6 +64,10 @@ class Command:
                 # get the parsed value
                 target = getattr(namespace, name)
                 # ugly case/switch style block is ugly
+
+                if value_type is Word:
+                    # a single word
+                    kwargs[name] = target
                 # if the Rescue is a plain Rescue type, just search
                 elif value_type in [Rescue[None], _Rescue]:
                     # any rescue

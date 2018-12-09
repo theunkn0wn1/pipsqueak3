@@ -7,11 +7,14 @@ from Modules.rat_rescue import Rescue as _Rescue
 # typedefs to builtin types (OK For export)
 Index = int
 Name = str
+Word = str
 
 # typeVars (Not for Export)
 _RescueType = TypeVar("_RescueType", _Rescue, Index, Name, UUID)  # Rescue type
 _RatType = TypeVar("_RatType", Name, UUID, _Rat)  # rat type
 
+
+# generic types (OK for export)
 
 class Rescue(Generic[_RescueType], _Rescue):
     """
