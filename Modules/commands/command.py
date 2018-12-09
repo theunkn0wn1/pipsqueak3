@@ -65,7 +65,7 @@ class Command:
                 target = getattr(namespace, name)
                 # ugly case/switch style block is ugly
 
-                if value_type is Word:
+                if value_type in [Word, int]:
                     # a single word
                     kwargs[name] = target
                 # if the Rescue is a plain Rescue type, just search

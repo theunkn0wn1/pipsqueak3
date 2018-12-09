@@ -20,7 +20,7 @@ from Modules.rat import Rat as _Rat
 from Modules.rat_rescue import Rescue as _Rescue
 from .parsers import ArgumentParser
 from .rat_command import _registered_commands
-from .types import Rescue, Rat, Name
+from .types import Rescue, Rat, Name, Word
 
 log = getLogger(f"mecha.{__name__}")
 
@@ -122,8 +122,19 @@ def parametrize(func: Callable) -> Callable:
         # get the argument's annotation
         annotation = spec.annotations[argument]
 
+        if annotation is int:
+            log.debug(f"adding int parsing group by name {argument}...")
+            parser.add_argument(argument, type=int, help="a number")
+            parser._parametrized_args[argument] = int
+
+        elif annotation is Word:
+            log.debug(f"adding word parsing group by name {argument}...")
+            parser.add_argument(argument, type=str, help="a word")
+            parser._parametrized_args[argument] = Word
+
         # check if we have a Rescue type
-        if annotation in [Rescue, Rescue[int], Rescue[str], Rescue[UUID], _Rescue, Rescue[type(None)]]:
+        elif annotation in [Rescue, Rescue[int], Rescue[str], Rescue[UUID], _Rescue,
+                            Rescue[type(None)]]:
             # use an ugly hack to get the specified sub-type. Im not happy i need to touch a magic
             # here but its not publicly exposed and im NOT subclassing (move the shit elsewhere).
             # suggestions on how to access the subtype more clearly are welcome.
@@ -133,7 +144,8 @@ def parametrize(func: Callable) -> Callable:
             else:
                 subtype = annotation.__args__[0]
 
-            log.debug(f"adding Rescue parser group by the name {argument} with subtype {subtype}...")
+            log.debug(
+                f"adding Rescue parser group by the name {argument} with subtype {subtype}...")
             parser.add_rescue_param(argument, subtype)
 
         elif annotation in [Rat, _Rat, Rat[UUID], Rat[Name]]:
@@ -146,8 +158,6 @@ def parametrize(func: Callable) -> Callable:
 
         else:
             raise RuntimeError
-
-
 
     # register the parser
     _registered_commands[func].parser = parser

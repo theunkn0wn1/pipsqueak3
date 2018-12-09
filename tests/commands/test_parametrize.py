@@ -14,7 +14,7 @@ from uuid import UUID
 
 from pytest import mark, fixture
 
-from Modules.commands import command, parametrize, Rescue as _Rescue, trigger, Name
+from Modules.commands import command, parametrize, Rescue as _Rescue, trigger, Name, Word
 from Modules.commands.rat_command import _flush, prefix
 from Modules.context import Context
 from Modules.rat_rescue import Rescue
@@ -104,3 +104,54 @@ async def test_help(bot_fx):
     assert retn is None
     # assert a message got emitted
     assert bot_fx.sent_messages
+
+
+@mark.usefixtures('Setup_fx')
+@mark.asyncio
+async def test_int(bot_fx):
+    @parametrize
+    @command('numerical')
+    async def cmd_numerical(context: Context, bar: int):
+        return bar
+
+    ctx = await Context.from_message(bot_fx, "#unit_test", 'some_ov',
+                                     f"{prefix}numerical 42")
+
+    retn = await trigger(ctx)
+
+    assert retn == 42
+
+
+@mark.usefixtures("Setup_fx")
+@mark.asyncio
+async def test_word_single(bot_fx):
+    @parametrize
+    @command('wordy')
+    async def cmd_wordy(context: Context, bar: Word):
+        return bar
+
+    ctx = await Context.from_message(bot_fx, "#unit_test", 'some_ov',
+                                     f"{prefix}wordy hi!")
+
+    retn = await trigger(ctx)
+
+    assert retn == 'hi!'
+
+
+@mark.usefixtures("Setup_fx")
+@mark.asyncio
+async def test_word_multiple(bot_fx):
+    @parametrize
+    @command('wordy')
+    async def cmd_wordy(context: Context, a: Word, b: str, c: Word, d: Word):
+        # a `str` type is intentionally thrown in here to prove the type alias behaves properly
+        return a, b, c, d
+
+    ctx = await Context.from_message(bot_fx, "#unit_test", 'some_ov',
+                                     f"{prefix}wordy i am a potato!")
+
+    retn = await trigger(ctx)
+
+    assert retn == ("i", "am", "a", "potato!")
+    # prove order is preserved
+    assert retn != ("am", "i", 'a', "potato!")
