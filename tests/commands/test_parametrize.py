@@ -27,7 +27,7 @@ def Setup_fx(bot_fx):
 
 @mark.usefixtures('Setup_fx')
 @mark.asyncio
-async def test_foo(bot_fx, rescue_sop_fx):
+async def test_rescue_int(bot_fx, rescue_sop_fx):
     # add a rescue to the board
     bot_fx.board.append(rescue_sop_fx)
 
@@ -39,6 +39,27 @@ async def test_foo(bot_fx, rescue_sop_fx):
 
     ctx = await Context.from_message(bot_fx, "#unit_test", 'some_ov',
                                f"{prefix}foo {rescue_sop_fx.board_index}")
+
+    retn = await trigger(ctx)
+
+    pass
+
+
+
+@mark.usefixtures('Setup_fx')
+@mark.asyncio
+async def test_rescue_help(bot_fx, rescue_sop_fx):
+    # add a rescue to the board
+    bot_fx.board.append(rescue_sop_fx)
+
+    @parametrize
+    @command('foo')
+    async def cmd_foo(context: Context, bar: Rescue[int]):
+        return 42
+
+
+    ctx = await Context.from_message(bot_fx, "#unit_test", 'some_ov',
+                               f"{prefix}foo -h")
 
     retn = await trigger(ctx)
 
