@@ -203,7 +203,7 @@ class RatBoard(object):
                 return rescue
         return None
 
-    def search(self, case: str) -> Optional[Rescue]:
+    def search(self, target: str) -> Optional[Rescue]:
         """
         Helper for searching for a case using implemented search functions.
 
@@ -218,19 +218,19 @@ class RatBoard(object):
             ValueError: argument was not an expected type
         """
         # ensure a proper type was passed
-        if not isinstance(case, str):
-            raise TypeError(f"Expected str, got {type(case)}")
+        if not isinstance(target, str):
+            raise TypeError(f"Expected str, got {type(target)}")
         # strings could be any of the valid types, check for the best one.
-        if case.isdigit():
-            case_number = int(case)
+        if target.isdigit():
+            case_number = int(target)
             return self.find_by_index(case_number)
         # UUIDs always start with @ and are 37 characters, so try to parse it
-        elif case[0] == "@" and len(case) == 37:
-            guid_str = case[1:]
+        elif target[0] == "@" and len(target) == 37:
+            guid_str = target[1:]
             guid = UUID(guid_str)
             return self.find_by_uuid(guid)
         else:
-            return self.find_by_name(case)
+            return self.find_by_name(target)
 
     def append(self, rescue: Rescue, overwrite: bool = False) -> None:
         """
