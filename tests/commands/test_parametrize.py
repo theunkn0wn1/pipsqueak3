@@ -30,12 +30,12 @@ def Setup_fx(bot_fx):
 
 @mark.usefixtures('Setup_fx')
 @mark.asyncio
-@mark.parametrize("subtype, func", [(int, 'board_index'),
-                                    (UUID, 'uuid'),
-                                    (Name, 'client'),
-                                    ]
+@mark.parametrize("subtype, method", [(int, 'board_index'),
+                                      (UUID, 'uuid'),
+                                      (Name, 'client'),
+                                      ]
                   )
-async def test_rescue_subtype(bot_fx, rescue_sop_fx, subtype, func):
+async def test_rescue_subtype(bot_fx, rescue_sop_fx, subtype, method):
     # add a rescue to the board
     bot_fx.board.append(rescue_sop_fx)
 
@@ -45,7 +45,7 @@ async def test_rescue_subtype(bot_fx, rescue_sop_fx, subtype, func):
         return bar
 
     ctx = await Context.from_message(bot_fx, "#unit_test", 'some_ov',
-                                     f"{prefix}foo {getattr(rescue_sop_fx, func)}")
+                                     f"{prefix}foo {getattr(rescue_sop_fx, method)}")
 
     retn = await trigger(ctx)
 
@@ -55,10 +55,10 @@ async def test_rescue_subtype(bot_fx, rescue_sop_fx, subtype, func):
 @mark.usefixtures('Setup_fx')
 @mark.asyncio
 @mark.parametrize("subtype", [Rescue, _Rescue])
-@mark.parametrize('func', ['board_index',
-                           'uuid',
-                           'client'])
-async def test_rescue_plain(bot_fx, rescue_sop_fx, subtype, func):
+@mark.parametrize('method', ['board_index',
+                             'uuid',
+                             'client'])
+async def test_rescue_plain(bot_fx, rescue_sop_fx, subtype, method):
     # add a rescue to the board
     bot_fx.board.append(rescue_sop_fx)
 
@@ -68,7 +68,7 @@ async def test_rescue_plain(bot_fx, rescue_sop_fx, subtype, func):
         return bar
 
     # uuid's get a silly prefix, lets be sure to include it
-    invocation = f"{prefix}foo {'@' if func == 'uuid' else ''}{getattr(rescue_sop_fx, func)}"
+    invocation = f"{prefix}foo {'@' if method == 'uuid' else ''}{getattr(rescue_sop_fx, method)}"
     ctx = await Context.from_message(bot_fx, "#unit_test", 'some_ov',
                                      invocation)
 
@@ -79,14 +79,21 @@ async def test_rescue_plain(bot_fx, rescue_sop_fx, subtype, func):
 
 @mark.usefixtures('Setup_fx')
 @mark.asyncio
-async def test_rescue_help(bot_fx, rescue_sop_fx):
-    # add a rescue to the board
-    bot_fx.board.append(rescue_sop_fx)
+async def test_help(bot_fx):
+    """
+    Verifies a help menu is appended to the parametrized command
+    Args:
+        bot_fx ():
+        rescue_plain_fx ():
+
+    Returns:
+
+    """
 
     @parametrize
     @command('foo')
-    async def cmd_foo(context: Context, bar: _Rescue[int]):
-        return bar
+    async def cmd_foo(context: Context):
+        return 42
 
     bot_fx.sent_messages.clear()
     ctx = await Context.from_message(bot_fx, "#unit_test", 'some_ov',
