@@ -53,7 +53,6 @@ class MechaClient(Client):
         """
         self._api_handler = None  # TODO: replace with handler init once it exists
         self._database_manager = None  # TODO: replace with dbm once it exists
-        self._rat_cache = None  # TODO: replace with ratcache once it exists
 
         self._board = RatBoard(handler=self.api_handler)
         self._rat_cache = RatCache()
@@ -107,7 +106,6 @@ class MechaClient(Client):
                 error_message = graceful_errors.make_graceful(ex, ex_uuid)
                 # and report it to the user
                 await self.message(channel, error_message)
-
 
     @property
     def database_mgr(self) -> object:

@@ -42,7 +42,6 @@ class ArgumentParser(QuittingArgumentParser):
         """mapping between positional arguments and their parametrized types"""
         super().__init__(*args, **kwargs)
 
-    # TODO: help support
     def error(self, message: str) -> NoReturn:
         log.debug(f"intercepted attempt to exit. message={message}")
         raise ParserError(message)
