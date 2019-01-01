@@ -12,9 +12,11 @@ Licensed under the BSD 3-Clause License.
 See LICENSE
 """
 import logging
+import psycopg2
 import random
 import string
 import sys
+
 from uuid import uuid4, UUID
 
 import pytest
@@ -45,6 +47,7 @@ from Modules.epic import Epic
 from Modules.user import User
 from Modules.mark_for_deletion import MarkForDeletion
 from tests.mock_callables import CallableMock, AsyncCallableMock
+from database import DatabaseManager
 
 
 @pytest.fixture(params=[("pcClient", Platforms.PC, "firestone", 24),
@@ -121,17 +124,14 @@ def bot_fx():
 @pytest.fixture
 def user_fx():
     return User(False,
-                0,
-                False,
                 None,
-                True,
                 True,
                 "unit_test",
                 "unit_test[bot]",
                 "unit_test",
                 "unittest.rats.fuelrats.com",
-                "potatobot",
-                "irc.fuelrats,com")
+                "potatobot"
+                )
 
 
 @pytest.fixture
@@ -238,6 +238,7 @@ def reset_rat_cache_fx(rat_cache_fx: RatCache):
     # and clean up after ourselves
     rat_cache_fx.flush()
 
+
 @pytest.fixture
 def permission_fx(monkeypatch) -> Permission:
     """
@@ -253,6 +254,7 @@ def permission_fx(monkeypatch) -> Permission:
     monkeypatch.setattr("Modules.permissions._by_vhost", {})
     permission = Permission(0, {"testing.fuelrats.com", "cheddar.fuelrats.com"})
     return permission
+
 
 @pytest.fixture
 def callable_fx():
@@ -273,3 +275,24 @@ def async_callable_fx():
     See :class:`AsyncCallableMock`.
     """
     return AsyncCallableMock()
+
+
+@pytest.fixture(scope="session")
+def test_dbm_fx() -> DatabaseManager:
+    """
+    Test fixture for Database Manager.
+
+    A DATABASE CONFIGURATION AND CONNECTION IS REQUIRED FOR THESE TESTS.
+    """
+    database = DatabaseManager()
+    return database
+
+
+@pytest.fixture(scope="session")
+def test_dbm_pool_fx(test_dbm_fx) -> psycopg2.pool.SimpleConnectionPool:
+    """
+    Test fixture for Database Manager's connection pool.
+
+    A DATABASE CONFIGURATION AND CONNECTION IS REQUIRED FOR THESE TESTS.
+    """
+    return test_dbm_fx._dbpool

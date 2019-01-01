@@ -134,13 +134,14 @@ class Context(object):
         # check if the message has our prefix
         prefixed = message.startswith(prefix)
 
-        # before removing it from the message
-        message = message.lstrip(prefix)
+        if prefixed:
+            # before removing it from the message
+            message = message[len(prefix):]
 
         # build the words and words_eol lists
         words, words_eol = _split_message(message)
         # get the user from a WHOIS query
-        user = await User.from_whois(bot, sender)
+        user = await User.from_pydle(bot, sender)
 
         # return a built context object
         return cls(bot, user, channel, words, words_eol, prefixed=prefixed)
