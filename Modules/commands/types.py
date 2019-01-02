@@ -1,16 +1,20 @@
-from typing import TypeVar, Generic
+from typing import TypeVar, Generic, List
 from uuid import UUID
-
+from argparse import ZERO_OR_MORE
 from Modules.rat import Rat as _Rat
 from Modules.rat_rescue import Rescue as _Rescue
 
 # typedefs to builtin types (OK For export)
 Index = int
+"""A case number (int)"""
 Name = str
+"""A name (string)"""
 Word = str
+"""A single (string) word"""
 
+REMAINDER: List[str] = ZERO_OR_MORE
 """
-Any remaining unprocessed words, this argument should come last
+Remaining, unprocessed words
 """
 
 # typeVars (Not for Export)

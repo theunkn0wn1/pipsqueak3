@@ -16,11 +16,10 @@ from logging import getLogger
 from typing import Any, Callable, Optional
 from uuid import UUID
 
-from argparse import REMAINDER
 from Modules.context import Context
 from Modules.rat_rescue import Rescue as _Rescue
 from .parsers import ArgumentParser, ParserError
-from .types import Rescue, Name, Rat, Index, Word
+from .types import Rescue, Name, Rat, Index
 
 # set the logger for rat_command
 log = getLogger(f"mecha.{__name__}")
@@ -56,46 +55,58 @@ class Command:
                 namespace = self.parser.parse_args(context.words[1:])
             except ParserError as exc:
                 # something went wrong during parsing, reply the error message
-                await context.reply(exc.args[0])
+
+                if "invalid" in exc.args[0] or "are required" in exc.args[0]:
+                    log.debug(f"function called with invalid arguments, caught exc: {exc}")
+                    await context.reply(self.parser.format_help())
+                else:
+                    await context.reply(f"something went wrong: {exc.args[0]}")
                 return
 
             log.debug(f"namespace={namespace}")
             # iterate over the parametrized arguments
-            for name, value_type in self.parser._parametrized_args.items():
+            for name, value_type in self.parser.parametrized_args.items():
                 # get the parsed value
                 target = getattr(namespace, name)
                 # ugly case/switch style block is ugly
-
-                if value_type in [Word, int, REMAINDER]:
-                    # simple types
-                    kwargs[name] = target
                 # if the Rescue is a plain Rescue type, just search
-                elif value_type in [Rescue[type(None)], _Rescue]:
+                if value_type in [Rescue[type(None)], _Rescue]:
                     # any rescue
-                    kwargs[name] = context.bot.board.search(target)
-
+                    value = context.bot.board.search(target)
+                    log.debug(f"appending kwarg '{name}' with value {target}")
+                    kwargs[name] = value
                 elif value_type is Rescue[Index]:
                     # rescue by board index
-                    kwargs[name] = context.bot.board.find_by_index(target)
-
+                    value = context.bot.board.find_by_index(target)
+                    log.debug(f"appending kwarg '{name}' with value {target}")
+                    kwargs[name] = value
                 elif value_type is Rescue[Name]:
                     # rescue by client name
-                    kwargs[name] = context.bot.board.find_by_name(target)
-
+                    value = context.bot.board.find_by_name(target)
+                    log.debug(f"appending kwarg '{name}' with value {target}")
+                    kwargs[name] = value
                 elif value_type is Rescue[UUID]:
                     # rescue by uuid
-                    kwargs[name] = context.bot.board.find_by_uuid(target)
-
+                    value = context.bot.board.find_by_uuid(target)
+                    log.debug(f"appending kwarg '{name}' with value {target}")
+                    kwargs[name] = value
                 elif value_type is Rat:
-                    kwargs[name] = await context.bot.rat_cache.get_rat(target)
-
+                    value = await context.bot.rat_cache.get_rat(target)
+                    log.debug(f"appending kwarg '{name}' with value {target}")
+                    kwargs[name] = value
                 elif value_type is Rat[UUID]:
-                    kwargs[name] = await context.bot.rat_cache.get_rat_by_uuid(target)
-
+                    value = await context.bot.rat_cache.get_rat_by_uuid(target)
+                    log.debug(f"appending kwarg '{name}' with value {target}")
+                    kwargs[name] = value
                 elif value_type is Rat[Name]:
-                    kwargs[name] = await context.bot.rat_cache.get_rat_by_name(target)
-
-                ...
+                    value = await context.bot.rat_cache.get_rat_by_name(target)
+                    log.debug(f"appending kwarg '{name}' with value {target}")
+                    kwargs[name] = value
+                # ...
+                else:
+                    # simple types
+                    log.debug(f"appending kwarg '{name}' with value {target}")
+                    kwargs[name] = target
 
         return await self._func(context=context, *args, **kwargs)
 

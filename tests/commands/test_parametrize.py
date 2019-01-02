@@ -13,8 +13,8 @@ See LICENSE.md
 from uuid import UUID
 
 from pytest import mark, fixture, raises
-from argparse import REMAINDER
-from Modules.commands import command, parametrize, Rescue as _Rescue, trigger, Name, Word
+
+from Modules.commands import command, parametrize, Rescue as _Rescue, trigger, Name, Word, REMAINDER
 from Modules.commands.rat_command import _flush, prefix
 from Modules.context import Context
 from Modules.rat_rescue import Rescue
@@ -182,3 +182,23 @@ async def test_parametrize_bad_remainder_order():
         @command("cmd_failure")
         async def cmd_failure(context: Context, remainder: REMAINDER, word: Word):
             ...
+
+
+@mark.usefixtures("Setup_fx")
+@mark.asyncio
+# @mark.xfail(strict=True)
+async def test_parametrize_boolean_t(bot_fx):
+    calls = []
+
+    @parametrize
+    @command("cmd_bool_true")
+    async def cmd_bool_true(context: Context, my_word:Word, boolean_t: bool, args:REMAINDER):
+        pass
+        calls.append(boolean_t)
+        assert boolean_t
+
+    ctx = await Context.from_message(bot_fx, "#unit_test", 'some_ov',
+                                     f"{prefix}cmd_bool_true potato -boolean_t")
+
+    await trigger(ctx)
+    assert calls

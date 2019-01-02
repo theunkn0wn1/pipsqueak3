@@ -16,7 +16,7 @@ See LICENSE.md
 from .command import Command
 from .parametrize import parametrize
 from .rat_command import command, _registered_commands, trigger
-from .types import Rescue, Rat, Name, Index, Word
+from .types import Rescue, Rat, Name, Index, Word, REMAINDER
 
 __all__ = [
     "Rescue",
@@ -27,4 +27,5 @@ __all__ = [
     "command",
     "trigger",
     "Word",
+    "REMAINDER"
 ]

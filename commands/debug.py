@@ -12,11 +12,9 @@ Licensed under the BSD 3-Clause License.
 See LICENSE.md
 """
 import logging
-from argparse import REMAINDER
-
 from psycopg2 import sql
 
-from Modules.commands import command, parametrize, Rescue, Word
+from Modules.commands import command, parametrize, Rescue, Word, REMAINDER
 from Modules.context import Context
 from Modules.permissions import require_permission, TECHRAT, require_channel
 from database import DatabaseManager
@@ -65,5 +63,5 @@ async def potato(context: Context, foo: Rescue):
 
 @parametrize
 @command('wordy')
-async def cmd_wordy(context: Context, foo: Word, snafu: Word, bar: REMAINDER):
-    await context.reply(f"first word:= {foo}\t remaining words:{bar}")
+async def cmd_wordy(context: Context, foo: Word, snafu: bool, bar: REMAINDER):
+    await context.reply(f"first word:= {foo};\tsnafu={snafu};\t remaining words:{bar}")

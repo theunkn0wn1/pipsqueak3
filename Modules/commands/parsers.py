@@ -38,7 +38,7 @@ class ParserWantsExit(ParserError):
 class ArgumentParser(QuittingArgumentParser):
 
     def __init__(self, *args, **kwargs):
-        self._parametrized_args: Dict[str, Type] = {}
+        self.parametrized_args: Dict[str, Type] = {}
         """mapping between positional arguments and their parametrized types"""
         super().__init__(*args, **kwargs)
 
@@ -48,7 +48,7 @@ class ArgumentParser(QuittingArgumentParser):
 
     def exit(self, status: int = 0, message="") -> NoReturn:
         # lol no, we ain't calling sys.exit(). log the call >..>
-        log.debug(f"intercepted attempt to exit. status={status}\tmessage={message}")
+        log.warning(f"intercepted attempt to exit. status={status}\tmessage={message}")
         # and raise a catchable exception
         raise ParserWantsExit(message)
 
@@ -76,7 +76,7 @@ class ArgumentParser(QuittingArgumentParser):
             raise ValueError(f"unknown Rescue subtype {validate_type}")
 
         # append argument to the types variable
-        self._parametrized_args[name] = Rescue[validate_type]
+        self.parametrized_args[name] = Rescue[validate_type]
 
         return self.add_argument(name, type=validate_type, help=help_str)
 
@@ -100,5 +100,5 @@ class ArgumentParser(QuittingArgumentParser):
         else:
             raise ValueError(f"unknown Rat subtype {type(validate_type)}")
 
-        self._parametrized_args[name] = _RatType[validate_type]
+        self.parametrized_args[name] = _RatType[validate_type]
         return self.add_argument(name, type=validate_type, help=help_str)

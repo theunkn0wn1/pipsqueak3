@@ -10,7 +10,7 @@ Licensed under the BSD 3-Clause License.
 
 See LICENSE.md
 """
-from argparse import SUPPRESS, REMAINDER
+from argparse import SUPPRESS, ZERO_OR_MORE
 from inspect import getfullargspec
 from logging import getLogger
 from typing import Callable
@@ -21,7 +21,7 @@ from Modules.rat import Rat as _Rat
 from Modules.rat_rescue import Rescue as _Rescue
 from .parsers import ArgumentParser
 from .rat_command import _registered_commands
-from .types import Rescue, Rat, Name, Word
+from .types import Rescue, Rat, Name, REMAINDER
 
 log = getLogger(f"mecha.{__name__}")
 
@@ -128,19 +128,9 @@ def parametrize(func: Callable) -> Callable:
         # get the argument's annotation
         annotation = spec.annotations[argument]
 
-        if annotation is int:
-            log.debug(f"adding int parsing group by name {argument}...")
-            parser.add_argument(argument, type=int, help="a number")
-            parser._parametrized_args[argument] = int
-
-        elif annotation is Word:
-            log.debug(f"adding word parsing group by name {argument}...")
-            parser.add_argument(argument, type=str, help="a word")
-            parser._parametrized_args[argument] = Word
-
         # check if we have a Rescue type
-        elif annotation in [Rescue, Rescue[int], Rescue[str], Rescue[UUID], _Rescue,
-                            Rescue[type(None)]]:
+        if annotation in [Rescue, Rescue[int], Rescue[str], Rescue[UUID], _Rescue,
+                          Rescue[type(None)]]:
             # use an ugly hack to get the specified sub-type. Im not happy i need to touch a magic
             # here but its not publicly exposed and im NOT subclassing (move the shit elsewhere).
             # suggestions on how to access the subtype more clearly are welcome.
@@ -162,14 +152,26 @@ def parametrize(func: Callable) -> Callable:
             log.debug(f"adding Rat parser group by the name {argument} with subtype {subtype}...")
             parser.add_rescue_param(argument, subtype)
 
+        elif annotation is bool:
+            # booleans
+            parser.add_argument(f"-{argument}", action="store_true")
+            log.debug(f"adding boolean parsing group for argument '-{argument}'")
+            parser.parametrized_args[argument] = annotation
+
         elif annotation is REMAINDER:
             log.debug(f"Adding Remainder parser group...")
 
-            parser.add_argument(argument, nargs=REMAINDER, help=SUPPRESS)
+            # don't actually use argparse.REMAINDER as its greedy.
+            # instead we use argparse.ZERO_OR_MORE aka '*'
+            parser.add_argument(argument, nargs=ZERO_OR_MORE, help=SUPPRESS)
 
-            parser._parametrized_args[argument] = REMAINDER
+            # noinspection PyTypeChecker
+            parser.parametrized_args[argument] = REMAINDER
         else:
-            raise NotImplementedError(f"unknown annotation {annotation}")
+            # simple types. If the type's constructor doesn't accept a single arg this will explode
+            log.debug(f"adding miscellaneous parser group for {argument}:{annotation}...")
+            parser.add_argument(argument, type=annotation, help=f"a {annotation}")
+            parser.parametrized_args[argument] = annotation
 
     # register the parser
     _registered_commands[func].parser = parser
