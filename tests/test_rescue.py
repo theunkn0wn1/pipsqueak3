@@ -10,15 +10,15 @@ See LICENSE.md
 
 This module is built on top of the Pydle system.
 """
-import pytest
 from copy import deepcopy
 from datetime import datetime
 from uuid import uuid4, UUID
-from Modules.epic import Epic
+
+import pytest
+
 from Modules.mark_for_deletion import MarkForDeletion
 from Modules.rat import Rat
 from Modules.rat_rescue import Rescue
-from Modules.rat_cache import RatCache, Platforms
 from utils.ratlib import Status
 
 pytestmark = pytest.mark.rescue
@@ -103,7 +103,7 @@ def test_updated_at_raises_typeerror(rescue_sop_fx):
     Verify Rescue.updated_at raises TypeError if given incorrect value,
     or is set to a date in the past.
     """
-    rescue_sop_fx._createdAt = datetime(1991, 1, 1, 1, 1, 1,)
+    rescue_sop_fx._createdAt = datetime(1991, 1, 1, 1, 1, 1, )
 
     # Set to a string time
     with pytest.raises(TypeError):
@@ -340,7 +340,7 @@ async def test_add_rats_bad_id(rat_no_id_fx, rescue_sop_fx):
     Verifies attempting to add a rat that does not have a API id fails as expected
     """
     with pytest.raises(ValueError, match="Assigned rat does not have a known API ID"):
-        await rescue_sop_fx.add_rat(rat=rat_no_id_fx)
+        await rescue_sop_fx.add_rat(rat_no_id_fx)
         assert rat_no_id_fx not in rescue_sop_fx.rats
 
 
@@ -353,7 +353,7 @@ async def test_add_rats_ok(rat_good_fx, rescue_sop_fx):
             rescue_sop_fx (Rescue):  Rescue object Test Fixture
     """
     # rescue_sop_fx:Rescue
-    await rescue_sop_fx.add_rat(rat=rat_good_fx)
+    await rescue_sop_fx.add_rat(rat_good_fx)
     assert rat_good_fx in rescue_sop_fx.rats
 
 
@@ -494,7 +494,7 @@ async def test_add_rat_by_rat_object(uuid: UUID, name: str, rescue_plain_fx: Res
 
     rat = Rat(uuid=uuid, name=name)
 
-    await result_rescue.add_rat(rat=rat)
+    await result_rescue.add_rat(rat)
 
     assert rat in result_rescue.rats
 
@@ -505,9 +505,8 @@ async def test_add_rat_by_uuid(uuid: UUID, name: str, rescue_plain_fx: Rescue, r
     """
     Verifies `Rescue.add_rat` can add a rat given a guid and a name
     """
-    result_rescue = deepcopy(rescue_plain_fx)
 
-    await result_rescue.add_rat(name=name, guid=uuid)
+    await rescue_plain_fx.add_rat(uuid)
 
     assert name in rat_cache_fx.by_name
 
@@ -517,7 +516,7 @@ async def test_add_rat_returns_rat_by_object(rat_good_fx: Rat, rescue_plain_fx: 
     """
     Verifies `Rescue.add_rat` returns a proper `Rat` object when given a valid Rat object
     """
-    result = await rescue_plain_fx.add_rat(rat=rat_good_fx)
+    result = await rescue_plain_fx.add_rat(rat_good_fx)
 
     assert result is rat_good_fx
 
@@ -530,7 +529,7 @@ async def test_add_rat_returns_rat_by_name(rat_cache_fx, rescue_plain_fx: Rescue
     # add our test rat to the cache so add_rat can find it
     rat_cache_fx.by_name[rat_good_fx.name] = rat_good_fx
 
-    result = await rescue_plain_fx.add_rat(name=rat_good_fx.name)
+    result = await rescue_plain_fx.add_rat(rat_good_fx.name)
 
     assert result is rat_good_fx
 
@@ -543,22 +542,7 @@ async def test_add_rat_returns_rat_by_uuid(rat_cache_fx, rescue_plain_fx: Rescue
     # add our test rat to the cache so add_rat can find it
     rat_cache_fx.by_uuid[rat_good_fx.uuid] = rat_good_fx
 
-    result = await rescue_plain_fx.add_rat(guid=rat_good_fx.uuid)
-
-    assert result is rat_good_fx
-
-
-@pytest.mark.asyncio
-async def test_add_rat_returns_rat_by_uuid_string(rat_cache_fx,
-                                                  rescue_plain_fx: Rescue,
-                                                  rat_good_fx: Rat):
-    """
-    Verifies `Rescue.add_rat` returns a proper `Rat` object when given a valid UUID string of a rat
-    """
-    # add our test rat to the cache so add_rat can find it
-    rat_cache_fx.by_uuid[rat_good_fx.uuid] = rat_good_fx
-
-    result = await rescue_plain_fx.add_rat(guid=str(rat_good_fx.uuid))
+    result = await rescue_plain_fx.add_rat(rat_good_fx.uuid)
 
     assert result is rat_good_fx
 
@@ -607,7 +591,7 @@ def test_mark_delete_invalid(rescue_sop_fx: Rescue):
 
         with pytest.raises(ValueError):
             rescue_sop_fx.mark_delete("unit_test", "")
-            
+
 
 def test_mark_for_deletion_unset(rescue_sop_fx: Rescue):
     """

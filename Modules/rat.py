@@ -19,7 +19,6 @@ from operator import xor
 from typing import Optional
 from uuid import UUID
 
-from Modules.rat_cache import RatCache
 from utils.ratlib import Platforms
 
 log = logging.getLogger(f"mecha.{__name__}")
@@ -51,13 +50,6 @@ class Rat(object):
         self._name = name
         self._hash = None
         # and update the cache, should it exist
-
-        if name and name not in RatCache().by_name:
-            # don't register duplicates
-            RatCache().by_name[name] = self
-        if uuid not in RatCache().by_uuid:
-            # don't register duplicates
-            RatCache().by_uuid[uuid] = self
 
     def __eq__(self, other: 'Rat') -> bool:
         """

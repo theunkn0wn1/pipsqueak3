@@ -99,12 +99,14 @@ def rat_no_id_fx():
                         ("psRatToTheRescue", Platforms.PS,
                          UUID("FEE1DEA-DFAC-0000-000001BADB001FEED"))],
                 )
-def rat_good_fx(request) -> Rat:
+def rat_good_fx(request, rat_cache_fx) -> Rat:
     """
     Testing fixture containing good and registered rats
     """
     params = request.param
     myRat = Rat(params[2], name=params[0], platform=params[1])
+
+    rat_cache_fx.add(myRat)
     return myRat
 
 
@@ -230,16 +232,6 @@ def mark_for_deletion_fx(request) -> MarkForDeletion:
 def rat_cache_fx():
     """provides a empty rat_cache"""
     return RatCache()
-
-
-@pytest.fixture(autouse=True)
-def reset_rat_cache_fx(rat_cache_fx: RatCache):
-    """"cleans up the rat_cache's cache"""
-    # ensure the cache is clean during setup
-    rat_cache_fx.flush()
-    yield
-    # and clean up after ourselves
-    rat_cache_fx.flush()
 
 
 @pytest.fixture

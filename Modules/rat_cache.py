@@ -11,152 +11,121 @@ Licensed under the BSD 3-Clause License.
 
 See LICENSE.md
 """
-from typing import Dict, Optional, TYPE_CHECKING
+from collections import abc
+from typing import Iterator, Union, Dict, Set, NoReturn, Optional
 from uuid import UUID
 
-from utils.ratlib import Platforms, Singleton
+from Modules.rat import Rat
+from utils.ratlib import Platforms
 
-if TYPE_CHECKING:
-    from Modules.rat import Rat
+_KeyType = Union[str, UUID]
+_ValueType = Rat
 
 
-class RatCache(Singleton):
+class RatCache(abc.Mapping, abc.Container):
     """
-    A cache of rat objects
+    The RatCache. Caches rats the bot has seen before for easy access later.
+
+    also provides some "get" methods for retrieving rats from the API
     """
+    __slots__ = ['_by_uuid', '_by_name', '_items', '_api_handler']
 
     def __init__(self, api_handler=None):
         """
-        Creates the ratcache
-        """
-        if not hasattr(self, "_initalized"):
-            self._initalized = True
-            self._cache_by_id: Dict[UUID, 'Rat'] = {}
-            self._cache_by_name: Dict[str, 'Rat'] = {}
-            self._api_handler = api_handler
-
-    @property
-    def api_handler(self):
-        """
-        RatCache's API handler
-        """
-        return self._api_handler
-
-    @api_handler.setter
-    def api_handler(self, value):
-        self._api_handler = value
-        # FIXME: add type check once the API gets merged in
-
-    @property
-    def by_uuid(self) -> Dict[UUID, 'Rat']:
-        """
-        Cache indexed by rat's UUID
-
-        Returns:
-            Dict[UUID, Rat]: ratcache indexed by UUID
-        """
-        return self._cache_by_id
-
-    @by_uuid.setter
-    def by_uuid(self, value: Dict[UUID, 'Rat']) -> None:
-        """
-        Sets the ratcache's by_uuid property
-
+        Creates a new Rat Cache.
         Args:
-            value (Dict[UUID, Rat]): new value for the cache
-
-        Returns: None
-
-        Raises:
-            TypeError: illegal type.
+            api_handler ():
         """
-        if not isinstance(value, dict):
-            raise TypeError(f"expected a dict. got {type(value)}")
+        self._by_uuid: Dict[UUID, _ValueType] = {}
+        self._by_name: Dict[str, _ValueType] = {}
+        self._items: Set[Rat] = set()
+        self._api_handler = api_handler
 
-        self._cache_by_id = value
+    def __contains__(self, item: Union[_ValueType, _KeyType]):
+        # true if its an item, or a valid key
+        return item in self._items or item in self._by_uuid or item in self._by_name
 
-    @property
-    def by_name(self) -> Dict[str, 'Rat']:
-        """
-        Rats cache indexed by rat names
+    def __setitem__(self, key: _KeyType, value: _ValueType) -> None:
+        if not isinstance(value, Rat):
+            # if the value isn't a rat bail out.
+            raise ValueError(f"object of type{type(value)} is not supported.")
 
-        Returns:
-            Dict[str, Rat]
-        """
-        return self._cache_by_name
+        # regardless of the key, always add the value to items
+        self._items.add(value)
 
-    @by_name.setter
-    def by_name(self, value: Dict[str, 'Rat']) -> None:
-        if not isinstance(value, Dict):
-            raise TypeError(f"expected a dict, got {type(value)}")
-        self._cache_by_name = value
+        if isinstance(key, str):
+            # type is a name
 
-    async def get_rat_by_name(self, name: str,
-                              platform: Optional[Platforms] = None,
-                              ) -> 'Rat' or None:
-        """
-        Finds a rat by name and optionally by platform
+            self._by_uuid[value.uuid] = value  # append to UUIDs
+            self._by_name[key] = value  # append to names
 
-        Will also accept both, and only return if the rat name matches its
-        uuid entry.
-
-        Args:
-            name (str): name to search for
-            platform (Platforms): platform to narrow search results by, if any.
-                - defaults to any platform (first match)
-
-        Returns:
-            Rat - found rat
-        """
-        if not isinstance(name, str) or not isinstance(platform,
-                                                       Platforms) and platform is not None:
-            raise TypeError("invalid types given.")
-
-        # initialize before use
-        found = None
-
-        try:
-            found = self.by_name[name]
-        except KeyError:
-            # no such rat in cache
-            if self.api_handler is not None:
-                found = await self.api_handler.someApiCall(name=name)  # pragma: no cover
-                # FIXME: replace SomeApiCall with the actual call once we have the interface
-            return found
+        elif isinstance(key, UUID):
+            self._by_uuid[key] = value  # append to UUIDs
+            self._by_name[value.name] = value  # append to names
         else:
-            # we found a rat
-            return found if (found.platform == platform or platform is None) else None
+            return NotImplemented
 
-    async def get_rat_by_uuid(self, uuid: UUID) -> Optional['Rat']:
+    def __getitem__(self, key: _KeyType) -> _ValueType:
+        # if its not in us, raise
+        if key not in self:
+            raise KeyError(key)
+
+        # its either a name or a UUID
+        if key in self._by_name:
+            return self._by_name[key]
+        else:
+            return self._by_uuid[key]
+
+    def __len__(self) -> int:
+        return len(self._items)
+
+    def __iter__(self) -> Iterator[_KeyType]:
+        return iter(self._by_name)
+
+    def add(self, value: Rat) -> NoReturn:
         """
-        Finds a rat by their UUID.
+        Appends a new rat to the cache
 
-        This method will first check the local cache and, in the event of a cache miss, will make an
-            API call.
+        Convenience wrapper.
 
         Args:
-            uuid (UUID): api uuid to find a rat for
+            value (Rat): rat object to append
+        """
+
+        self[value.name] = value
+
+    def clear(self) -> NoReturn:
+        self._items.clear()
+        self._by_name.clear()
+        self._by_uuid.clear()
+
+    async def get_rat_by_name(self,
+                              name: str,
+                              platform: Optional[Platforms] = None) -> Optional[Rat]:
+        """
+        Retrieves a rat from the API by its specified name and, optionally, restricted to a platform
+
+        Args:
+            name (str): target name to search for
+            platform(Platforms): Platform to narrow search to
 
         Returns:
-            Rat: found rat
-        """
-        if not isinstance(uuid, UUID):
-            raise TypeError
-        else:
-            found = None
-            if uuid in self.by_uuid:
-                found = self.by_uuid[uuid]
-            elif self.api_handler is not None:  # pragma: no cover
-                found = await self.api_handler.get_rat_by_id(id=uuid)
+            Rat object, if a rat was found.
 
-            return found
-
-    def flush(self) -> None:
+        Note:
+            this will not return any local instances of a matching rat, use :meth:`__getitem__` instead.
         """
-        Flushes the caches.
+        raise NotImplementedError("retrieving rats from the API  is presently not implemented!")
+
+    async def get_rat_by_uuid(self, uuid) -> Optional[Rat]:
+        """
+        Retrieve a rat from the API by its specified uuid (rat id)
+
+        Args:
+            uuid (UUID): rat id of target rat
 
         Returns:
-            None
+            Rat object, if a rat was found.
         """
-        self.by_name.clear()
-        self.by_uuid.clear()
+        raise NotImplementedError("retrieving rats from the API  is presently not implemented!")
+
