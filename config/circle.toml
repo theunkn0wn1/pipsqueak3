@@ -1,6 +1,6 @@
 [irc]
 nickname = "Mechasqueak3-tests[BOT]"
-server = "irc"
+server = "DESKTOP-IRRMSCE"
 port = 6697
 tls = true
 channels = [ "#unkn0wndev",]
@@ -13,7 +13,7 @@ base_logger = "testmecha"
 log_file = "logs/unit_tests.log"
 
 [database]
-host = "localhost"
+host = "DESKTOP-IRRMSCE"
 port = 5432
 dbname = "circle_test"
 username = "root"

@@ -15,8 +15,8 @@ import logging
 
 from src.config import PLUGIN_MANAGER
 from src.packages.commands import command
-from src.packages.context.context import Context
-from src.packages.permissions.permissions import require_permission, TECHRAT, require_channel
+from src.packages.context import Context
+from src.packages.permissions import require_permission, TECHRAT, require_channel
 
 LOG = logging.getLogger(f"mecha.{__name__}")
 
