@@ -1,10 +1,12 @@
 import logging
+import typing
 
 from src.packages.commands import command
 from src.packages.context import Context
 from src.packages.permissions import require_permission, RAT, require_channel
 from src.packages.rescue import Rescue
 from src.packages.utils.ratlib import try_parse_uuid
+from src.packages.galaxy import StarSystem, Galaxy
 
 LOG = logging.getLogger(f"mecha.{__name__}")
 
@@ -22,8 +24,10 @@ async def cmd_inject(ctx: Context):
     """
     if len(ctx.words) < 3:  # prefix case user [...]
         ...  # FIXME : invalid usage
+        await ctx.reply("Invalid usage.")
+        return
 
-    # !inject {target} {words} {*words}
+        # !inject {target} {words} {*words}
     _, target, *words = ctx.words
     LOG.debug(f"in inject, target := {target}")
     if target.isnumeric():
@@ -35,8 +39,8 @@ async def cmd_inject(ctx: Context):
             await ctx.reply(f"unable to find rescue at index {index: <3}")
             return  # bail out
         async with ctx.bot.board.modify_rescue(index) as rescue:
-            rescue.add_quote(" ".join(words))
-            await ctx.reply(f"{rescue.client}'s case updated with '{' '.join(words)}'")
+            rescue.add_quote(remainder(words))
+            await ctx.reply(f"{rescue.client}'s case updated with '{remainder(words)}'")
             return
 
     # not numeric, lets see if its a UUID or @UUID
@@ -49,15 +53,20 @@ async def cmd_inject(ctx: Context):
 
     if uuid:
         async with ctx.bot.board.modify_rescue(uuid) as rescue:
-            rescue.add_quote(author=ctx.user.username, message=" ".join(words))
+            rescue.add_quote(author=ctx.user.username, message=remainder(words))
             await ctx.reply(f"adding quote to rescue {rescue.board_index: <3} "
-                            f"'{' '.join(words)}'")
+                            f"'{remainder(words)}'")
             return
     LOG.debug("nothing else fits the bill, making a new rescue...")
+
     async with ctx.bot.board.create_rescue(client=target) as rescue:
         rescue: Rescue
         rescue.add_quote(message=ctx.words_eol[2], author=ctx.user.nickname)
-    await ctx.reply(f"{target}'s case opened with {ctx.words_eol[2]}")
+    await ctx.reply(f"{target}'s case opened with {remainder(words)}")
+
+
+def remainder(words: typing.Iterable[str]) -> str:
+    return " ".join(words)
 
 
 @command("debug_list")
