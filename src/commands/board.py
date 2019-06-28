@@ -22,17 +22,22 @@ async def cmd_inject(ctx: Context):
     if len(ctx.words) < 3:  # prefix case user [...]
         ...  # FIXME : invalid usage
 
-    if ctx.words[1].isnumeric():
+    # !inject {target} {words} {*words}
+    _, target, *words = ctx.words
+
+    if target.isnumeric():
         # first argument is numeric, parse it into an integer (should be safe due to .isnumeric)
         LOG.debug("first word is numerical, looking for an existing")
-        index = int(ctx.words[1])
+        index = int(target)
         if index not in ctx.bot.board:
             LOG.warning(f"unable to locate rescue by index {index}!")
             await ctx.reply(f"unable to find rescue at index {index: <3}")
-            async with ctx.bot.board.create_rescue(client=ctx.words[2]) as rescue:
-                rescue: Rescue
-                rescue.add_quote(message=ctx.words_eol[3], author=ctx.user.nickname)
-            await ctx.reply("created rescue")
+            return  # bail out
+
+    async with ctx.bot.board.create_rescue(client=target) as rescue:
+        rescue: Rescue
+        rescue.add_quote(message=ctx.words_eol[3], author=ctx.user.nickname)
+    await ctx.reply(f"{target}'s case opened with {ctx.words_eol[3]}")
 
 
 @command("debug_list")
