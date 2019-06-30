@@ -1,5 +1,6 @@
 import logging
 import typing
+from dataclasses import dataclass
 
 from src.packages.commands import command
 from src.packages.context import Context
@@ -95,10 +96,76 @@ async def cmd_list(ctx: Context):
     """
     Implementation of !list
 
+        Supported parameters:
+        -i: Also show inactive (but still open) cases.
+        -r: Show assigned rats
+        -u: Show only cases with no assigned rats
+        -@: Show full case IDs.  (LONG)
+
     Args:
         ctx:
 
-    Returns:
-
     """
-    raise NotImplementedError
+    _, *words = ctx.words
+
+    flags = ListFlags()
+    platform_filter = None
+
+    # plain invocation
+    if len(words) == 0:
+        show_inactive = False
+        show_assigned_rats = False
+        only_unassigned_rescues = False
+        full_uuids = False
+
+
+    # arguments invocation
+    elif len(words) == 1 or len(words) == 2:
+        flags_set = False
+        platform_filter_set = False
+
+        for word in words:  # type: str
+            if word.startswith('-'):
+                if flags_set:
+                    raise RuntimeError("invalid usage")  # FIXME: usage warning to user
+                flags = ListFlags.from_word(word)
+                flags_set = True
+            else:
+                # platform or bust
+                if platform_filter_set:
+                    raise RuntimeError("invalid usage")  # FIXME: usage error
+
+                try:
+                    platform_filter = Platforms[word.upper()]
+                except KeyError:
+                    return await ctx.reply(f"unrecognized platform '{word.upper()}'")
+
+    else:
+        raise RuntimeError  # FIXME: usage error
+    LOG.debug(f"flags set:= {flags} \t platform_filter := {platform_filter}")
+    await ctx.reply(f"flags set:= {flags} \t platform_filter := {platform_filter}")  # FIXME remove debug code here
+    active_rescues = []
+    inactive_rescues = []
+    for rescue in ctx.bot.board:
+        rescue: Rescue
+        if rescue.active:
+            active_rescues.append(rescue)
+        else:
+            inactive_rescues.append(rescue)
+
+
+@dataclass(frozen=True)
+class ListFlags:
+    show_inactive: bool = False
+    filter_unassigned_rescues: bool = False
+    show_assigned_rats: bool = False
+    show_uuids: bool = False
+
+    @classmethod
+    def from_word(cls, argument: str):
+        argument = argument.casefold()
+        show_inactive = "i" in argument
+        show_assigned_rats = "r" in argument
+        filter_unassigned_rescues = "u" in argument
+        show_uuids = "@" in argument
+        return cls(show_inactive, filter_unassigned_rescues, show_assigned_rats, show_uuids)
