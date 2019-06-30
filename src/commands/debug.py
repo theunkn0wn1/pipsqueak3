@@ -68,3 +68,12 @@ async def cmd_get_plugins(context: Context):
     plugins = PLUGIN_MANAGER.list_name_plugin()
     names = [plugin[0] for plugin in plugins]
     await context.reply(",".join(names))
+
+
+@command("debug_list")
+async def cmd_debug_list(ctx: Context):
+    for rescue in ctx.bot.board.values():
+        await ctx.reply(
+            f"rescue #{rescue.board_index:0>3} for user {rescue.client} (@{rescue.api_id})")
+    else:
+        await ctx.reply("no rescues found.")

@@ -102,10 +102,6 @@ def remainder(words: typing.Iterable[str]) -> str:
     return " ".join(words)
 
 
-@command("debug_list")
-async def cmd_debug_list(ctx: Context):
-    for rescue in ctx.bot.board.values():
-        await ctx.reply(
-            f"rescue #{rescue.board_index:0>3} for user {rescue.client} (@{rescue.api_id})")
-    else:
-        await ctx.reply("no rescues found.")
+
+
+
