@@ -180,6 +180,9 @@ async def cmd_list(ctx: Context):
 
 @dataclass(frozen=True)
 class ListFlags:
+    """
+    Flags used by the !list command, includes a parser.
+    """
     show_inactive: bool = False
     filter_unassigned_rescues: bool = False
     show_assigned_rats: bool = False
@@ -187,6 +190,15 @@ class ListFlags:
 
     @classmethod
     def from_word(cls, argument: str):
+        """
+        construct an object from a given argument word
+
+        Args:
+            argument(str): flags word
+
+        Returns:
+            ListFlags instance
+        """
         argument = argument.casefold()
 
         show_inactive = "i" in argument
