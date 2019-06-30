@@ -124,7 +124,7 @@ def load_config(filename: str) -> Tuple[Dict, str]:
     # check if the file exists
     if not path.exists():
         logging.error(f"unable to load {path.absolute()}")
-        exit(4)
+        raise FileNotFoundError(path)
     logging.debug(f"Found a file/directory at {path.resolve(strict=True)}'! attempting to load...")
 
     # read the raw bytes into a buffer
