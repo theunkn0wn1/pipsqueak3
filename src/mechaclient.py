@@ -162,7 +162,7 @@ class MechaClient(Client):
         Rat Board property
 
         """
-        if not self._rat_board:
+        if self._rat_board is None:
             self._rat_board = RatBoard()  # Create Rat Board Object
         return self._rat_board
 
