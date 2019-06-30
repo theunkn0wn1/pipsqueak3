@@ -1,3 +1,4 @@
+import io
 import logging
 import typing
 from dataclasses import dataclass
@@ -161,9 +162,17 @@ async def cmd_list(ctx: Context):
     if not active_rescues:
         await ctx.reply("No active rescues.")
 
-    await ctx.reply(
-        f"{len(active_rescues): <3} active cases, "
-        f"{', '.join(f'{rescue:ca}' for rescue in active_rescues)}")
+    format_specifiers = "c"
+    if flags.show_assigned_rats:
+        format_specifiers += 'a'
+    if flags.show_uuids:
+        format_specifiers += '@'
+
+    buffer = io.StringIO(f"{len(active_rescues): <3} active cases, ")
+    for rescue in active_rescues:
+        buffer.write(format(rescue, format_specifiers))
+        buffer.write('\n')
+    await ctx.reply(buffer.getvalue())
     if flags.show_inactive:
         if not inactive_rescues:
             await ctx.reply("No inactive rescues.")
