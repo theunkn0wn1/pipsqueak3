@@ -150,10 +150,10 @@ async def cmd_list(ctx: Context):
     active_rescues = []
     inactive_rescues = []
 
-    filter = functools.partial(_rescue_filter, flags, platform_filter)
+    rescue_filter = functools.partial(_rescue_filter, flags, platform_filter)
 
-    for rescue in itertools.filterfalse(filter, iter(ctx.bot.board.values())):
-        rescue: Rescue
+    for rescue in itertools.filterfalse(rescue_filter, iter(ctx.bot.board.values())):
+
         if rescue.active:
             active_rescues.append(rescue)
         else:
