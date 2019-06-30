@@ -3,10 +3,10 @@ import typing
 
 from src.packages.commands import command
 from src.packages.context import Context
-from src.packages.permissions import require_permission, RAT, require_channel
+from src.packages.permissions import require_channel
 from src.packages.rescue import Rescue
+from src.packages.utils import Platforms
 from src.packages.utils.ratlib import try_parse_uuid
-from src.packages.galaxy import StarSystem, Galaxy
 
 LOG = logging.getLogger(f"mecha.{__name__}")
 
@@ -58,11 +58,18 @@ async def cmd_inject(ctx: Context):
                             f"'{remainder(words)}'")
             return
     LOG.debug("nothing else fits the bill, making a new rescue...")
+    for platform_str in ("pc", "ps", "xb"):
+        if platform_str in remainder(words).casefold():
+            platform = Platforms[platform_str.upper()]
+            break
+    else:
+        platform = None
 
-    async with ctx.bot.board.create_rescue(client=target) as rescue:
+    async with ctx.bot.board.create_rescue(client=target, platform=platform) as rescue:
         rescue: Rescue
         rescue.add_quote(message=ctx.words_eol[2], author=ctx.user.nickname)
-    await ctx.reply(f"{target}'s case opened with {remainder(words)}")
+    await ctx.reply(f"{target}'s case opened with {remainder(words)}"
+                    f" ({rescue.board_index}, {rescue.platform.name})")
 
 
 def remainder(words: typing.Iterable[str]) -> str:
