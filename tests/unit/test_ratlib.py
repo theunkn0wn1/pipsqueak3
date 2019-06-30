@@ -9,7 +9,6 @@ from src.packages.utils import ratlib as ratlib
 
 pytestmark = [pytest.mark.unit, pytest.mark.ratlib]
 
-
 nickname_test_list = [
     ('ThisIsATest[BOT]', "ThisIsATest"),
     ('firehawk2421', 'firehawk2421'),
@@ -110,21 +109,21 @@ def test_singleton_indirect_inheritance():
 @pytest.mark.parametrize("expected_color", (Colors.RED, Colors.BLUE, Colors.BLACK, Colors.GREEN))
 def test_color_single_color(expected_color, random_string_fx):
     test_string = random_string_fx
-    assert f"{Formatting.FORMAT_COLOR.value}{expected_color}{test_string}" \
-           f"{Formatting.FORMAT_COLOR.value}" == color(test_string, expected_color)
+    expected = f"{Formatting.FORMAT_COLOR.value}{expected_color.value}{test_string}{Formatting.FORMAT_COLOR.value}"
+    assert expected == color(test_string, expected_color)
 
 
 @pytest.mark.parametrize("expected_color,expected_bg_color", (
-                        (Colors.RED, Colors.ORANGE),
-                        (Colors.BROWN, Colors.BLUE),
-                        (Colors.YELLOW, Colors.GREY)
-                        ))
+        (Colors.RED, Colors.ORANGE),
+        (Colors.BROWN, Colors.BLUE),
+        (Colors.YELLOW, Colors.GREY)
+))
 def test_color_background_color(random_string_fx, expected_color, expected_bg_color):
     test_string = random_string_fx
     assert f"{Formatting.FORMAT_COLOR.value}{expected_color},{expected_bg_color}{test_string}" \
-           f"{Formatting.FORMAT_COLOR.value}" == color(test_string,
-                                                       expected_color,
-                                                       expected_bg_color)
+               f"{Formatting.FORMAT_COLOR.value}" == color(test_string,
+                                                           expected_color,
+                                                           expected_bg_color)
 
 
 def test_color_bold(random_string_fx):
@@ -163,6 +162,7 @@ def test_vector_init(x, y, z):
     assert vector.x == x
     assert vector.y == y
     assert vector.z == z
+
 
 @pytest.mark.parametrize("vector, expected",
                          ((Vector(0, 0, 0), 0),

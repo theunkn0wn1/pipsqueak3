@@ -856,7 +856,6 @@ class Rescue:  # pylint: disable=too-many-public-methods
         show_assigned_rats = 'r' in format_spec
         show_uuid = '@' in format_spec
 
-        print(f"rescue's format called with spec:= '{format_spec}'")  # FIXME: debug code
         buffer = StringIO()
         buffer.write(f"[{self.board_index}")
 
