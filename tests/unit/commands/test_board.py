@@ -28,7 +28,8 @@ pytestmark = [pytest.mark.unit, pytest.mark.commands, pytest.mark.asyncio, pytes
     ('Pc', Platforms.PC),
     ('ps', Platforms.PS),
     ('xb', Platforms.XB),
-    ('XB', Platforms.XB)
+    ('XB', Platforms.XB),
+    ('XBoX', Platforms.XB)
 ])
 async def test_inject_create(bot_fx, rat_board_fx, name, platform, random_string_fx):
     platform_str, expected = platform

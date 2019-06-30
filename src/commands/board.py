@@ -1,6 +1,8 @@
 import logging
 import typing
 from dataclasses import dataclass
+import functools
+import itertools
 
 from src.packages.commands import command
 from src.packages.context import Context
@@ -143,15 +145,26 @@ async def cmd_list(ctx: Context):
     else:
         raise RuntimeError  # FIXME: usage error
     LOG.debug(f"flags set:= {flags} \t platform_filter := {platform_filter}")
-    await ctx.reply(f"flags set:= {flags} \t platform_filter := {platform_filter}")  # FIXME remove debug code here
+    await ctx.reply(
+        f"flags set:= {flags} \t platform_filter := {platform_filter}")  # FIXME remove debug code here
     active_rescues = []
     inactive_rescues = []
-    for rescue in ctx.bot.board:
+
+    filter = functools.partial(_rescue_filter, flags, platform_filter)
+
+    for rescue in itertools.filterfalse(filter, iter(ctx.bot.board.values())):
         rescue: Rescue
         if rescue.active:
             active_rescues.append(rescue)
         else:
             inactive_rescues.append(rescue)
+
+    if not active_rescues:
+        await ctx.reply("No active rescues.")
+
+    if flags.show_inactive:
+        if not inactive_rescues:
+            await ctx.reply("No inactive rescues.")
 
 
 @dataclass(frozen=True)
@@ -164,8 +177,45 @@ class ListFlags:
     @classmethod
     def from_word(cls, argument: str):
         argument = argument.casefold()
+
         show_inactive = "i" in argument
+        """
+        Show inactive rescues
+        """
         show_assigned_rats = "r" in argument
+        """
+        Show assigned rats per rescue
+        """
         filter_unassigned_rescues = "u" in argument
+        """
+        only show rescues without assigned rats
+        """
         show_uuids = "@" in argument
+        """
+        show API UUIDs
+        """
         return cls(show_inactive, filter_unassigned_rescues, show_assigned_rats, show_uuids)
+
+
+def _rescue_filter(flags: ListFlags,
+                   platform_filter: typing.Optional[Platforms],
+                   rescue: Rescue) -> bool:
+    """
+    determine whether the `rescue` object is one we care about
+
+    Args:
+        rescue: 
+
+    Returns:
+
+    """
+    filters = []
+
+    if flags.filter_unassigned_rescues:
+        # return whether any rats are assigned
+        # either properly or via unidentified rats
+        filters.append(bool(rescue.rats) or bool(rescue.unidentified_rats))
+
+    # use the active bool on rescue if we don't want inactives, otherwise True
+    filters.append(rescue.active if not flags.show_inactive else True)
+    return not all(filters)
