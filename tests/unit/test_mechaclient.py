@@ -41,13 +41,6 @@ def test_verify_rat_cache_private(bot_fx):
     assert bot_fx._rat_cache is None
 
 
-def test_verify_rat_board_private(bot_fx):
-    """
-    Asserts the private reference for the Rat Board is none, after instantiation.
-    """
-    assert bot_fx._rat_board is None
-
-
 def test_verify_api_handler(bot_fx):
     """
     Asserts the API handler raises an Attribute error if setting is attempted.
