@@ -7,6 +7,7 @@ from src.packages.permissions import require_channel
 from src.packages.rescue import Rescue
 from src.packages.utils import Platforms
 from src.packages.utils.ratlib import try_parse_uuid
+from src.packages.board import BOARD_KEY_TYPE
 
 LOG = logging.getLogger(f"mecha.{__name__}")
 
@@ -35,7 +36,7 @@ async def cmd_inject(ctx: Context):
         return await _inject_update_index(ctx, target, words)
 
     if target in ctx.bot.board:
-        return await _inject_update_name(ctx, target, words)
+        return await _inject_do_update(ctx, target, words)
     # not numeric, lets see if its a UUID or @UUID
     uuid = try_parse_uuid(target if not target.startswith('@') else target[1:])
     # if the uuid is None, or it parses successfully but does not exist in board
@@ -45,11 +46,8 @@ async def cmd_inject(ctx: Context):
         return
 
     if uuid:
-        async with ctx.bot.board.modify_rescue(uuid) as rescue:
-            rescue.add_quote(author=ctx.user.username, message=remainder(words))
-            await ctx.reply(f"adding quote to rescue {rescue.board_index: <3} "
-                            f"'{remainder(words)}'")
-            return
+        await _inject_do_update(ctx, uuid, payload=remainder(words))
+
     LOG.debug("nothing else fits the bill, making a new rescue...")
     # check if a platform is specified, must be the whole word
     # (prevents weirdness with words that start contain pc and friends)
@@ -79,23 +77,20 @@ async def _inject_update_index(ctx, target, words):
         await ctx.reply(f"{rescue.client}'s case updated with '{remainder(words)}'")
 
 
-async def _inject_update_name(ctx: Context, target: str, words: typing.List[str]):
+async def _inject_do_update(ctx: Context, target: BOARD_KEY_TYPE, payload: str):
     """
-    Update a existing rescue by client name
+    Do the actual quote append thing
 
     Args:
-        ctx:
-        target:
-        words:
-
-    Returns:
-
+        ctx: execution context
+        target: subject of the inject
+        words: remaining unparsed words in the inject
     """
     async with ctx.bot.board.modify_rescue(target) as rescue:
         rescue: Rescue
-        rescue.add_quote(message=remainder(words), author=ctx.user.username)
+        rescue.add_quote(message=payload, author=ctx.user.username)
 
-    await ctx.reply(f"updated {rescue.client}'s case with {remainder(words)}")
+    await ctx.reply(f"updated {rescue.client}'s case with {payload}")
 
 
 def remainder(words: typing.Iterable[str]) -> str:
