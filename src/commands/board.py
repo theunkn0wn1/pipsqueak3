@@ -58,8 +58,10 @@ async def cmd_inject(ctx: Context):
                             f"'{remainder(words)}'")
             return
     LOG.debug("nothing else fits the bill, making a new rescue...")
+    # check if a platform is specified, must be the whole word
+    # (prevents weirdness with words that start contain pc and friends)
     for platform_str in ("pc", "ps", "xb"):
-        if platform_str in remainder(words).casefold():
+        if platform_str in (word.casefold() for word in words):
             platform = Platforms[platform_str.upper()]
             break
     else:

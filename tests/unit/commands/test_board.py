@@ -11,11 +11,11 @@ See LICENSE.md
 
 import logging
 
-from src.commands import administration
-from src.packages.context import Context
-
 import pytest
+
 from src.commands import board as board_commands
+from src.packages.context import Context
+from src.packages.utils import Platforms
 
 LOG = logging.getLogger(f"mecha.{__name__}")
 
@@ -23,14 +23,23 @@ pytestmark = [pytest.mark.unit, pytest.mark.commands, pytest.mark.asyncio, pytes
 
 
 @pytest.mark.parametrize("name", ('lordBusiness22', 'sicklyTadpole', 'WHATS_GOIN_ON'))
-@pytest.mark.parametrize("platform", ('pc', 'Pc', 'ps', 'xb', 'XB'))
+@pytest.mark.parametrize("platform", [
+    ('pc', Platforms.PC),
+    ('Pc', Platforms.PC),
+    ('ps', Platforms.PS),
+    ('xb', Platforms.XB),
+    ('XB', Platforms.XB)
+])
 async def test_inject_create(bot_fx, rat_board_fx, name, platform, random_string_fx):
+    platform_str, expected = platform
     context = await Context.from_message(bot_fx,
                                          "#fuelrats",
                                          "some_admin",
-                                         f"!inject {name} {platform} {random_string_fx}"
+                                         f"!inject {name} {platform_str} {random_string_fx}"
                                          )
 
     await board_commands.cmd_inject(context)
 
     assert name in rat_board_fx
+
+    assert rat_board_fx[name].platform is expected, "platform mismatch!"
