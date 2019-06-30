@@ -71,7 +71,7 @@ async def cmd_inject(ctx: Context):
         rescue: Rescue
         rescue.add_quote(message=ctx.words_eol[2], author=ctx.user.nickname)
     await ctx.reply(f"{target}'s case opened with {remainder(words)}"
-                    f" ({rescue.board_index}, {rescue.platform.name})")
+                    f" ({rescue.board_index}, {rescue.platform.name if rescue.platform else ''})")
 
 
 def remainder(words: typing.Iterable[str]) -> str:
