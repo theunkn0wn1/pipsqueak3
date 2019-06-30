@@ -33,10 +33,15 @@ async def cmd_inject(ctx: Context):
     LOG.debug(f"in inject, target := {target}")
     if target.isnumeric():
         # first argument is numeric, parse it into an integer (should be safe due to .isnumeric)
-        return await _inject_update_index(ctx, target, words)
+        LOG.debug("first word is numerical, looking for an existing")
+        index = int(target)
+        if index not in ctx.bot.board:
+            LOG.warning(f"unable to locate rescue by index {index}!")
+            return await ctx.reply(f"unable to find rescue at index {index: <3}")
+        return await _inject_do_update(ctx, int(target), remainder(words))
 
     if target in ctx.bot.board:
-        return await _inject_do_update(ctx, target, words)
+        return await _inject_do_update(ctx, target, remainder(words))
     # not numeric, lets see if its a UUID or @UUID
     uuid = try_parse_uuid(target if not target.startswith('@') else target[1:])
     # if the uuid is None, or it parses successfully but does not exist in board
@@ -65,18 +70,6 @@ async def cmd_inject(ctx: Context):
                     f" ({rescue.board_index}, {rescue.platform.name if rescue.platform else ''})")
 
 
-async def _inject_update_index(ctx, target, words):
-    LOG.debug("first word is numerical, looking for an existing")
-    index = int(target)
-    if index not in ctx.bot.board:
-        LOG.warning(f"unable to locate rescue by index {index}!")
-        return await ctx.reply(f"unable to find rescue at index {index: <3}")
-
-    async with ctx.bot.board.modify_rescue(index) as rescue:
-        rescue.add_quote(remainder(words))
-        await ctx.reply(f"{rescue.client}'s case updated with '{remainder(words)}'")
-
-
 async def _inject_do_update(ctx: Context, target: BOARD_KEY_TYPE, payload: str):
     """
     Do the actual quote append thing
@@ -97,6 +90,15 @@ def remainder(words: typing.Iterable[str]) -> str:
     return " ".join(words)
 
 
+@command("list")
+async def cmd_list(ctx: Context):
+    """
+    Implementation of !list
 
+    Args:
+        ctx:
 
+    Returns:
 
+    """
+    raise NotImplementedError
