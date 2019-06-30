@@ -1,17 +1,17 @@
+import functools
 import io
+import itertools
 import logging
 import typing
 from dataclasses import dataclass
-import functools
-import itertools
 
+from src.packages.board import BOARD_KEY_TYPE
 from src.packages.commands import command
 from src.packages.context import Context
 from src.packages.permissions import require_channel
 from src.packages.rescue import Rescue
 from src.packages.utils import Platforms
 from src.packages.utils.ratlib import try_parse_uuid
-from src.packages.board import BOARD_KEY_TYPE
 
 LOG = logging.getLogger(f"mecha.{__name__}")
 
@@ -116,11 +116,7 @@ async def cmd_list(ctx: Context):
 
     # plain invocation
     if len(words) == 0:
-        show_inactive = False
-        show_assigned_rats = False
-        only_unassigned_rescues = False
-        full_uuids = False
-
+        ...  # use above defaults (done this way so else can be used below as an error state)
 
     # arguments invocation
     elif len(words) == 1 or len(words) == 2:
@@ -161,18 +157,19 @@ async def cmd_list(ctx: Context):
 
     if not active_rescues:
         await ctx.reply("No active rescues.")
+    else:
+        format_specifiers = "c"
+        if flags.show_assigned_rats:
+            format_specifiers += 'r'
+        if flags.show_uuids:
+            format_specifiers += '@'
 
-    format_specifiers = "c"
-    if flags.show_assigned_rats:
-        format_specifiers += 'r'
-    if flags.show_uuids:
-        format_specifiers += '@'
-
-    buffer = io.StringIO(f"{len(active_rescues): <3} active cases, ")
-    for rescue in active_rescues:
-        buffer.write(format(rescue, format_specifiers))
-        buffer.write('\n')
-    await ctx.reply(buffer.getvalue())
+        buffer = io.StringIO()
+        buffer.write(f"{len(active_rescues):3} active cases. ")
+        for rescue in active_rescues:
+            buffer.write(format(rescue, format_specifiers))
+            buffer.write('\n')
+        await ctx.reply(buffer.getvalue())
     if flags.show_inactive:
         if not inactive_rescues:
             await ctx.reply("No inactive rescues.")
@@ -241,4 +238,7 @@ def _rescue_filter(flags: ListFlags,
 
     # use the active bool on rescue if we don't want inactives, otherwise True
     filters.append(rescue.active if not flags.show_inactive else True)
+
+    if platform_filter:  # if we rae filtering on platform
+        filters.append(rescue.platform is platform_filter)
     return not all(filters)
