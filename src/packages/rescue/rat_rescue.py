@@ -847,12 +847,9 @@ class Rescue:  # pylint: disable=too-many-public-methods
         """
         'c' gives the thing colour
         'a' gives rat assignments
-        'u' gives uuids ...
-        Args:
-            format_spec:
+        'u' gives uuids
 
-        Returns:
-
+        order of format specifiers is NOT sensitive but IS case sensitive!
         """
 
         coloured = 'c' in format_spec
@@ -881,12 +878,12 @@ class Rescue:  # pylint: disable=too-many-public-methods
                     buffer.write(color(base, Colors.GREEN))
                 elif self.platform is Platforms.PS:
                     buffer.write(color(base, Colors.BLUE))
-            else:
-                buffer.write(base)
+                else:
+                    buffer.write(base)
 
         if show_assigned_rats:
             buffer.write(' Assigned Rats:')
             buffer.write(', '.join([rat.name for rat in self.rats]))
 
-        # buffer.write()
+        # convert buffer back to string, and return that
         return buffer.getvalue()

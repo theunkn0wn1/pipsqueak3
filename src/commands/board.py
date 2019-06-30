@@ -145,15 +145,14 @@ async def cmd_list(ctx: Context):
     else:
         raise RuntimeError  # FIXME: usage error
     LOG.debug(f"flags set:= {flags} \t platform_filter := {platform_filter}")
-    await ctx.reply(
-        f"flags set:= {flags} \t platform_filter := {platform_filter}")  # FIXME remove debug code here
-    active_rescues = []
-    inactive_rescues = []
+    active_rescues: typing.List[Rescue] = []
+    inactive_rescues: typing.List[Rescue] = []
 
     rescue_filter = functools.partial(_rescue_filter, flags, platform_filter)
 
-    for rescue in itertools.filterfalse(rescue_filter, iter(ctx.bot.board.values())):
-
+    # for each rescue that doesn't matches the filter
+    for rescue in itertools.filterfalse(rescue_filter, iter(ctx.bot.board.values())):  # type: Rescue
+        # put it in the right list
         if rescue.active:
             active_rescues.append(rescue)
         else:
@@ -162,6 +161,9 @@ async def cmd_list(ctx: Context):
     if not active_rescues:
         await ctx.reply("No active rescues.")
 
+    await ctx.reply(
+        f"{len(active_rescues): <3} active cases, "
+        f"{', '.join(f'{rescue:ca}' for rescue in active_rescues)}")
     if flags.show_inactive:
         if not inactive_rescues:
             await ctx.reply("No inactive rescues.")
