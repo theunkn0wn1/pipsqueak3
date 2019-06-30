@@ -51,14 +51,14 @@ async def cmd_inject(ctx: Context):
         return
 
     if uuid:
-        await _inject_do_update(ctx, uuid, payload=remainder(words))
+        return await _inject_do_update(ctx, uuid, payload=remainder(words))
 
     LOG.debug("nothing else fits the bill, making a new rescue...")
     # check if a platform is specified, must be the whole word
     # (prevents weirdness with words that start contain pc and friends)
-    for platform_str in ("pc", "ps", "xb"):
+    for platform_str in ("pc", "ps", "xb", "xbox"):
         if platform_str in (word.casefold() for word in words):
-            platform = Platforms[platform_str.upper()]
+            platform = Platforms[platform_str.upper()[:2]]
             break
     else:
         platform = None
