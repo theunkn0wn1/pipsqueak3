@@ -43,3 +43,14 @@ async def test_inject_create(bot_fx, rat_board_fx, name, platform, random_string
     assert name in rat_board_fx
 
     assert rat_board_fx[name].platform is expected, "platform mismatch!"
+
+
+async def test_inject_existing(bot_fx, rat_board_fx, rescue_sop_fx):
+    # append existing rescue from fixture into the board
+    await rat_board_fx.append(rescue_sop_fx)
+    payload = f"!inject {rescue_sop_fx.client} update data is updated!"
+    context = await Context.from_message(bot_fx, "#fuelrats", "some_ov", payload)
+
+    await board_commands.cmd_inject(context)
+
+    assert len(rat_board_fx) == 1, "inject made a second case...."
