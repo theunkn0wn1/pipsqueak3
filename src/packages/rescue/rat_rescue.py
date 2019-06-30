@@ -16,12 +16,14 @@ from datetime import datetime
 from typing import Union, Optional, List, TYPE_CHECKING
 from uuid import UUID, uuid4
 
+from src.packages.utils import Colors, Formatting, color, bold
 from ..cache import RatCache
 from ..epic import Epic
 from ..mark_for_deletion import MarkForDeletion
 from ..quotation import Quotation
 from ..rat import Rat
 from ..utils import Platforms, Status
+from io import StringIO
 
 if TYPE_CHECKING:
     from ..board import RatBoard
@@ -840,3 +842,51 @@ class Rescue:  # pylint: disable=too-many-public-methods
     # TODO: to/from json
     # TODO: track changes
     # TODO: helper method for adding / editing quotes
+
+    def __format__(self, format_spec):
+        """
+        'c' gives the thing colour
+        'a' gives rat assignments
+        'u' gives uuids ...
+        Args:
+            format_spec:
+
+        Returns:
+
+        """
+
+        coloured = 'c' in format_spec
+        show_assigned_rats = 'a' in format_spec
+        show_uuid = '@' in format_spec
+
+        print(f"rescue's format called with spec:= '{format_spec}'")  # FIXME: debug code
+        buffer = StringIO()
+        buffer.write(f"[{self.board_index}")
+
+        buffer.write(f"@{self.api_id}] " if show_uuid else '] ')
+        buffer.write(F"{self.client} ")
+
+        if self.code_red:
+            base = '(CR) '
+            if coloured:
+                buffer.write(bold(color(base, Colors.RED)))
+            else:
+                buffer.write(base)
+
+        if self.platform:
+            base = self.platform.name
+
+            if coloured:
+                if self.platform is Platforms.XB:
+                    buffer.write(color(base, Colors.GREEN))
+                elif self.platform is Platforms.PS:
+                    buffer.write(color(base, Colors.BLUE))
+            else:
+                buffer.write(base)
+
+        if show_assigned_rats:
+            buffer.write(' Assigned Rats:')
+            buffer.write(', '.join([rat.name for rat in self.rats]))
+
+        # buffer.write()
+        return buffer.getvalue()
