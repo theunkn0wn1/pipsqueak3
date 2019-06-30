@@ -853,7 +853,7 @@ class Rescue:  # pylint: disable=too-many-public-methods
         """
 
         coloured = 'c' in format_spec
-        show_assigned_rats = 'a' in format_spec
+        show_assigned_rats = 'r' in format_spec
         show_uuid = '@' in format_spec
 
         print(f"rescue's format called with spec:= '{format_spec}'")  # FIXME: debug code

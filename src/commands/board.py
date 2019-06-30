@@ -164,7 +164,7 @@ async def cmd_list(ctx: Context):
 
     format_specifiers = "c"
     if flags.show_assigned_rats:
-        format_specifiers += 'a'
+        format_specifiers += 'r'
     if flags.show_uuids:
         format_specifiers += '@'
 
