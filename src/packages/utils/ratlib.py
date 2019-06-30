@@ -214,7 +214,7 @@ def color(text: str, text_color: Colors, bg_color: Optional[Colors] = None) -> s
         return f'{Formatting.FORMAT_COLOR.value}{text_color},{bg_color}{text}' \
             f'{Formatting.FORMAT_COLOR.value}'
 
-    return f'{Formatting.FORMAT_COLOR.value}{text_color}{text}{Formatting.FORMAT_COLOR.value}'
+    return f'{Formatting.FORMAT_COLOR.value}{text_color.value}{text}{Formatting.FORMAT_COLOR.value}'
 
 
 def bold(text: str) -> str:
