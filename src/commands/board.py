@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from src.packages.board import BOARD_KEY_TYPE
 from src.packages.commands import command
 from src.packages.context import Context
-from src.packages.permissions import require_channel
+from src.packages.permissions import require_channel, require_permission, RAT
 from src.packages.rescue import Rescue
 from src.packages.utils import Platforms
 from src.packages.utils.ratlib import try_parse_uuid
@@ -249,3 +249,31 @@ def _rescue_filter(flags: ListFlags,
     if platform_filter:  # if we rae filtering on platform
         filters.append(rescue.platform is platform_filter)
     return not all(filters)
+
+
+@require_permission(RAT)
+@require_channel
+@command('active', 'activate', 'inactive', 'deactivate')
+async def cmd_active(ctx: Context):
+    if not len(ctx.words) == 2:
+        raise RuntimeError("usage error")  # TODO proper usage errors
+
+    _, target = ctx.words
+
+    if target.isnumeric():
+        target = int(target)
+    else:
+        target_mabie = try_parse_uuid(target)
+
+        if target_mabie:
+            target = target_mabie
+
+        del target_mabie
+
+    if target not in ctx.bot.board:
+        return await ctx.reply(f"Unable to find rescue by key '{target}'. Check your spelling.")
+
+    async with ctx.bot.board.modify_rescue(target) as rescue:  # type: Rescue
+        rescue.active = not rescue.active
+
+    await ctx.reply(f"{rescue.client}'s case is now {'active' if rescue.active else 'inactive'}")
