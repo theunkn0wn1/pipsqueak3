@@ -154,15 +154,15 @@ async def cmd_list(ctx: Context):
             active_rescues.append(rescue)
         else:
             inactive_rescues.append(rescue)
+    format_specifiers = "c"
+    if flags.show_assigned_rats:
+        format_specifiers += 'r'
+    if flags.show_uuids:
+        format_specifiers += '@'
 
     if not active_rescues:
         await ctx.reply("No active rescues.")
     else:
-        format_specifiers = "c"
-        if flags.show_assigned_rats:
-            format_specifiers += 'r'
-        if flags.show_uuids:
-            format_specifiers += '@'
 
         buffer = io.StringIO()
         buffer.write(f"{len(active_rescues):3} active cases. ")
@@ -172,7 +172,14 @@ async def cmd_list(ctx: Context):
         await ctx.reply(buffer.getvalue())
     if flags.show_inactive:
         if not inactive_rescues:
-            await ctx.reply("No inactive rescues.")
+            return await ctx.reply("No inactive rescues.")
+
+        buffer = io.StringIO()
+        buffer.write(f"{len(inactive_rescues):3} inactive cases. ")
+        for rescue in inactive_rescues:
+            buffer.write(format(rescue, format_specifiers))
+            buffer.write('\n')
+        await ctx.reply(buffer.getvalue())
 
 
 @dataclass(frozen=True)
