@@ -260,6 +260,18 @@ async def cmd_active(ctx: Context):
 
     _, target = ctx.words
 
+    target = coerce_rescue_type(target)
+
+    if target not in ctx.bot.board:
+        return await ctx.reply(f"Unable to find rescue by key '{target}'. Check your spelling.")
+
+    async with ctx.bot.board.modify_rescue(target) as rescue:  # type: Rescue
+        rescue.active = not rescue.active
+
+    await ctx.reply(f"{rescue.client}'s case is now {'active' if rescue.active else 'inactive'}")
+
+
+def coerce_rescue_type(target):
     if target.isnumeric():
         target = int(target)
     else:
@@ -269,11 +281,4 @@ async def cmd_active(ctx: Context):
             target = target_mabie
 
         del target_mabie
-
-    if target not in ctx.bot.board:
-        return await ctx.reply(f"Unable to find rescue by key '{target}'. Check your spelling.")
-
-    async with ctx.bot.board.modify_rescue(target) as rescue:  # type: Rescue
-        rescue.active = not rescue.active
-
-    await ctx.reply(f"{rescue.client}'s case is now {'active' if rescue.active else 'inactive'}")
+    return target
