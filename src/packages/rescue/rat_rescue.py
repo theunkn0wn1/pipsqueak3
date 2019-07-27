@@ -101,6 +101,7 @@ class Rescue:  # pylint: disable=too-many-public-methods
             rats (list): identified Rat(s) assigned to rescue.
             platform(Platforms): Platform for rescue
         """
+        self._modified_attrs: typing.Set[str] = set()
         self._platform: Platforms = platform
         self._rats = rats if rats else []
         self._api_id: UUID = uuid if uuid else uuid4()
@@ -121,7 +122,6 @@ class Rescue:  # pylint: disable=too-many-public-methods
         self._lang_id = lang_id
         self._status = status
         self._hash = None
-        self._modified_attrs: typing.Set[str]
 
     def __eq__(self, other) -> bool:
         """
@@ -167,6 +167,7 @@ class Rescue:  # pylint: disable=too-many-public-methods
         """
         if isinstance(value, Status):
             self._status = value
+            self._modified_attrs.add("status")
         else:
             raise TypeError
 
@@ -193,6 +194,7 @@ class Rescue:  # pylint: disable=too-many-public-methods
         """
         if isinstance(value, str):
             self._irc_nick = value
+            self._modified_attrs.add("irc_nickname")
         else:
             raise TypeError
 
@@ -215,6 +217,7 @@ class Rescue:  # pylint: disable=too-many-public-methods
         """
         if isinstance(value, str):
             self._lang_id = value
+            self._modified_attrs.add("lang_id")
         else:
             raise TypeError
 
@@ -233,6 +236,7 @@ class Rescue:  # pylint: disable=too-many-public-methods
         """
         if isinstance(value, Platforms):
             self._platform = value
+            self._modified_attrs.add("platform")
         else:
             raise TypeError(f"expected a Platforms, got type {type(value)}")
 
@@ -264,6 +268,7 @@ class Rescue:  # pylint: disable=too-many-public-methods
         """
         if isinstance(value, UUID):
             self._first_limpet = value
+            self._modified_attrs.add("first_limpet")
         else:
             # the value wasn't a uuid, but lets try and coerce it into one.
             try:
@@ -303,6 +308,7 @@ class Rescue:  # pylint: disable=too-many-public-methods
         if isinstance(value, int) or value is None:
             if value is None or value >= 0:
                 self._board_index = value
+                self._modified_attrs.add("board_index")
             else:
                 raise ValueError("Value must be greater than or equal to zero,"
                                  " or None.")
@@ -343,6 +349,7 @@ class Rescue:  # pylint: disable=too-many-public-methods
             None
         """
         self._client = value
+        self._modified_attrs.add("client")
 
     @property
     def system(self) -> typing.Optional[str]:
@@ -378,6 +385,7 @@ class Rescue:  # pylint: disable=too-many-public-methods
         if value is None:
             # System must be nullable, so we specifically check for it
             self._system = value
+            self._modified_attrs.add("system")
         # for API v2.1 compatibility reasons we cast to upper case
         self._system = value.upper()
 
@@ -409,6 +417,7 @@ class Rescue:  # pylint: disable=too-many-public-methods
                 self.status = Status.OPEN
             else:
                 self.status = Status.INACTIVE
+            self._modified_attrs.add("active")
         else:
             raise ValueError(f"expected bool, got type {type(value)}")
 
@@ -440,6 +449,7 @@ class Rescue:  # pylint: disable=too-many-public-methods
         """
         if isinstance(value, list):
             self._quotes = value
+            self._modified_attrs.add("quotes")
         else:
             raise ValueError(f"expected type list, got {type(value)}")
 
@@ -491,6 +501,7 @@ class Rescue:  # pylint: disable=too-many-public-methods
             for name in value:
                 if isinstance(name, str):
                     self._unidentified_rats.append(name)
+                    self._modified_attrs.add("unidentified_rats")
                 else:
                     raise ValueError(f"Element '{name}' expected to be of type str"
                                      f"str, got {type(name)}")
@@ -527,6 +538,7 @@ class Rescue:  # pylint: disable=too-many-public-methods
                 self.status = Status.OPEN
             else:
                 self.status = Status.CLOSED
+            self._modified_attrs.add("open")
         else:
             raise TypeError(f"expected type bool, got {type(value)}")
 
@@ -557,6 +569,7 @@ class Rescue:  # pylint: disable=too-many-public-methods
     def code_red(self, value: bool):
         if isinstance(value, bool):
             self._code_red = value
+            self._modified_attrs.add("code_red")
         else:
             raise TypeError(f"expected type bool, got {type(value)}")
 
@@ -598,6 +611,7 @@ class Rescue:  # pylint: disable=too-many-public-methods
         """
         if value is None or isinstance(value, str):
             self._title = value
+            self._modified_attrs.add("title")
         else:
             raise TypeError(f"expected type None or str, got {type(value)}")
 
@@ -627,6 +641,7 @@ class Rescue:  # pylint: disable=too-many-public-methods
         """
         if isinstance(value, MarkForDeletion):
             self._mark_for_deletion = value
+            self._modified_attrs.add("marked_for_deletion")
         else:
             raise TypeError(f"got {type(value)} expected MarkForDeletion object")
 
@@ -654,6 +669,7 @@ class Rescue:  # pylint: disable=too-many-public-methods
         """
         if isinstance(value, list):
             self._rats = value
+            self._modified_attrs.add("rats")
 
         else:
             raise TypeError(f"expected type list got {type(value)}")
