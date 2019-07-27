@@ -69,10 +69,10 @@ def rescue_sop_fx(request) -> Rescue:
         Rescue : Rescue objects
     """
     params = request.param
-    myRescue = Rescue(uuid4(), client=params[0], system=params[2], irc_nickname=params[0],
-                      board_index=params[3])
-    myRescue.platform = params[1]
-    return myRescue
+    created_rescue = Rescue(uuid4(), client=params[0], system=params[2], irc_nickname=params[0],
+                            board_index=params[3], platform=params[1])
+
+    return created_rescue
 
 
 @pytest.fixture(params=(0, 1))

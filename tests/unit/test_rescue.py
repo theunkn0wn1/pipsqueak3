@@ -10,6 +10,7 @@ See LICENSE.md
 
 This module is built on top of the Pydle system.
 """
+import typing
 from copy import deepcopy
 from datetime import datetime
 from uuid import uuid4, UUID
@@ -19,7 +20,7 @@ import pytest
 from src.packages.mark_for_deletion.mark_for_deletion import MarkForDeletion
 from src.packages.rat.rat import Rat
 from src.packages.rescue.rat_rescue import Rescue
-from src.packages.utils import Status
+from src.packages.utils import Status, Platforms
 
 pytestmark = [pytest.mark.unit, pytest.mark.rescue]
 
@@ -684,3 +685,20 @@ def test_rescue_code_red_setter(rescue_sop_fx):
 
     with pytest.raises(TypeError):
         rescue_sop_fx.code_red = 'Yes'
+
+
+@pytest.mark.parametrize("field, value",
+                         [
+                             ("client", "foobar"),
+                             ("system", "KI"),
+                             ("active", True),
+                             ("board_index", 42),
+                             ("first_limpet", UUID('dead4ac0-0000-0000-0000-00000000beef')),
+                             ("platform", Platforms.XB),
+                             ("lang_id", "EN"),
+                             ("irc_nickname", "sicklyTadpole"),
+                             ("status", Status.INACTIVE),
+                         ])
+def test_setattr_tracking(rescue_sop_fx, field: str, value: typing.Any, rat_good_fx):
+    setattr(rescue_sop_fx, field, value)
+    assert field in rescue_sop_fx._modified_attrs

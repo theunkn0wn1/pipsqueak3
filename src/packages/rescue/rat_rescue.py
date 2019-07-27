@@ -155,7 +155,7 @@ class Rescue:  # pylint: disable=too-many-public-methods
         return self._status
 
     @status.setter
-    def status(self, value: status):
+    def status(self, value: Status):
         """
         Set the value of the status enum
 
@@ -251,14 +251,14 @@ class Rescue:  # pylint: disable=too-many-public-methods
         return self._first_limpet
 
     @first_limpet.setter
-    def first_limpet(self, value: UUID) -> None:
+    def first_limpet(self, value: typing.Union[str, UUID]) -> None:
         """
         Set the value of the first limpet rat
 
         If the value is not a UUID, this method will attempt to coerce it into one.
 
         Args:
-            value (UUID): rat id of the first-limpet rat.
+            value (UUID or str): rat id of the first-limpet rat.
 
         Returns:
             None
@@ -282,7 +282,7 @@ class Rescue:  # pylint: disable=too-many-public-methods
                 self._first_limpet = guid
 
     @property
-    def board_index(self) -> int or None:
+    def board_index(self) -> typing.Optional[int]:
         """
         The position on the rescue board this rescue holds, if any.
 
@@ -292,14 +292,14 @@ class Rescue:  # pylint: disable=too-many-public-methods
         return self._board_index
 
     @board_index.setter
-    def board_index(self, value: int or None) -> None:
+    def board_index(self, value: typing.Optional[int]) -> None:
         """
         Sets the Rescue's board index
 
         Set to None if the rescue is not attached to the board.
 
         Args:
-            value (int or None): index position
+            value (typing.Optional[int]): index position
 
         Returns:
             None
@@ -385,9 +385,9 @@ class Rescue:  # pylint: disable=too-many-public-methods
         if value is None:
             # System must be nullable, so we specifically check for it
             self._system = value
-            self._modified_attrs.add("system")
         # for API v2.1 compatibility reasons we cast to upper case
         self._system = value.upper()
+        self._modified_attrs.add("system")
 
     @property
     def active(self) -> bool:
