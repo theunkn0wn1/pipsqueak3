@@ -31,6 +31,7 @@ def test_rescue_defaults():
 
     Rescue()
 
+
 @pytest.mark.parametrize("expected_client", ['DeadBeef', 'Commander_Test', '11Alpha1',
                                              'Xxx22K1ng2xxX'])
 def test_verify_rescue_client(rescue_plain_fx, expected_client):
@@ -75,42 +76,6 @@ def test_client_is_set(rescue_sop_fx):
     Verifies that rescue_sop_fx._client is set.
     """
     assert rescue_sop_fx.client != ''
-
-
-def test_created_at_date_exists(rescue_sop_fx):
-    """
-    Verifies rescue.created_at datetime is set, and in the past.
-    """
-    expected_time_differential = (datetime.utcnow() - rescue_sop_fx.created_at)
-    assert expected_time_differential != 0
-
-
-def test_updated_at_date_exists(rescue_sop_fx):
-    """
-    Verifies rescue.updated_at is correct
-    """
-    rescue_sop_fx._updatedAt = datetime(1990, 1, 1, 1, 1, 1)
-
-    with rescue_sop_fx.change():
-        rescue_sop_fx.system = 'UpdatedSystem'
-
-    assert rescue_sop_fx.updated_at != datetime(1990, 1, 1, 1, 1, 1)
-
-
-def test_updated_at_raises_typeerror(rescue_sop_fx):
-    """
-    Verify Rescue.updated_at raises TypeError if given incorrect value,
-    or is set to a date in the past.
-    """
-    rescue_sop_fx._createdAt = datetime(1991, 1, 1, 1, 1, 1,)
-
-    # Set to a string time
-    with pytest.raises(TypeError):
-        rescue_sop_fx.updated_at = '07:32:01 4-4-2063'
-
-    # Set to the past:
-    with pytest.raises(ValueError):
-        rescue_sop_fx.updated_at = datetime(1990, 1, 1, 1, 1, 1)
 
 
 @pytest.mark.parametrize("expected_rats", [['Joeblow', 'TinyTim', 'White Sheets'],
@@ -605,7 +570,7 @@ def test_mark_delete_invalid(rescue_sop_fx: Rescue):
 
         with pytest.raises(ValueError):
             rescue_sop_fx.mark_delete("unit_test", "")
-            
+
 
 def test_mark_for_deletion_unset(rescue_sop_fx: Rescue):
     """

@@ -10,10 +10,11 @@ See LICENSE.md
 
 This module is built on top of the Pydle system.
 """
+from __future__ import annotations
 import logging
+import typing
 from contextlib import contextmanager
 from datetime import datetime
-from typing import Union, Optional, List, TYPE_CHECKING
 from uuid import UUID, uuid4
 
 from ..cache import RatCache
@@ -23,7 +24,7 @@ from ..quotation import Quotation
 from ..rat import Rat
 from ..utils import Platforms, Status
 
-if TYPE_CHECKING:
+if typing.TYPE_CHECKING:
     from ..board import RatBoard
 
 LOG = logging.getLogger(f"mecha.{__name__}")
@@ -36,22 +37,20 @@ class Rescue:  # pylint: disable=too-many-public-methods
 
     def __init__(self,  # pylint: disable=too-many-locals
                  uuid: UUID = None,
-                 client: Optional[str] = None,
-                 system: Optional[str] = None,
-                 irc_nickname: Optional[str] = None,
+                 client: typing.Optional[str] = None,
+                 system: typing.Optional[str] = None,
+                 irc_nickname: typing.Optional[str] = None,
                  board: 'RatBoard' = None,
-                 created_at: Optional[datetime] = None,
-                 updated_at: Optional[datetime] = None,
-                 unidentified_rats: Optional[List[str]] = None,
+                 unidentified_rats: typing.Optional[typing.List[str]] = None,
                  active: bool = True,
-                 quotes: Optional[List[Quotation]] = None,
-                 epic: List[Epic] = None,
-                 title: Optional[str] = None,
-                 first_limpet: Optional[UUID] = None,
-                 board_index: Optional[int] = None,
+                 quotes: typing.Optional[typing.List[Quotation]] = None,
+                 epic: typing.List[Epic] = None,
+                 title: typing.Optional[str] = None,
+                 first_limpet: typing.Optional[UUID] = None,
+                 board_index: typing.Optional[int] = None,
                  mark_for_deletion: MarkForDeletion = MarkForDeletion(),
                  lang_id: str = "EN",
-                 rats: List[Rat] = None,
+                 rats: typing.List[Rat] = None,
                  status: Status = Status.OPEN,
                  code_red=False,
                  platform: Platforms = None):
@@ -66,8 +65,6 @@ class Rescue:  # pylint: disable=too-many-public-methods
             client (str): Commander name of the Commander rescued
             system (str): System name the Commander is stranded in
                 (WILL BE CAST TO UPPER CASE)
-            created_at (datetime): time the case was first created
-                **( READONLY )**
             updated_at (datetime): last time the case was modified
             unidentified_rats (list): list of unidentified rats responding to
                 rescue **(nicknames)**
@@ -87,10 +84,8 @@ class Rescue:  # pylint: disable=too-many-public-methods
             platform(Platforms): Platform for rescue
         """
         self._platform: Platforms = platform
-        self.rat_board: 'RatBoard' = board
+        self.rat_board: 'RatBoard' = board  # FIXME -> private attr
         self._rats = rats if rats else []
-        self._created_at: datetime = created_at if created_at else datetime.utcnow()
-        self._updated_at: datetime = updated_at if updated_at else datetime.utcnow()
         self._api_id: UUID = uuid if uuid else uuid4()
         self._client: str = client
         self._irc_nick: str = irc_nickname
@@ -98,10 +93,10 @@ class Rescue:  # pylint: disable=too-many-public-methods
         self._system: str = system.upper() if system else None
         self._active: bool = active
         self._quotes: list = quotes if quotes else []
-        self._epic: List[Epic] = epic if epic is not None else []
+        self._epic: typing.List[Epic] = epic if epic is not None else []
         self._code_red: bool = code_red
         self._outcome: None = None
-        self._title: Union[str, None] = title
+        self._title: typing.Optional[str] = title
         self._first_limpet: UUID = first_limpet
         self._board_index = board_index
         self._mark_for_deletion = mark_for_deletion
@@ -109,6 +104,7 @@ class Rescue:  # pylint: disable=too-many-public-methods
         self._lang_id = lang_id
         self._status = status
         self._hash = None
+        self._modified_attrs: typing.Set[str]
 
     def __eq__(self, other) -> bool:
         """
@@ -332,23 +328,7 @@ class Rescue:  # pylint: disable=too-many-public-methods
         self._client = value
 
     @property
-    def created_at(self) -> datetime:
-        """
-        Case creation time.
-
-        Notes
-            this property is **READONLY**.
-
-
-        It can only be set during Rescue object creation
-
-        Returns:
-            datetime: creation date
-        """
-        return self._created_at
-
-    @property
-    def system(self) -> Optional[str]:
+    def system(self) -> typing.Optional[str]:
         """
         The clients system name
 
@@ -358,7 +338,7 @@ class Rescue:  # pylint: disable=too-many-public-methods
         return self._system
 
     @system.setter
-    def system(self, value: Optional[str]):
+    def system(self, value: typing.Optional[str]):
         """
         Sets the system property to the upper case of `value`
 
@@ -468,41 +448,9 @@ class Rescue:  # pylint: disable=too-many-public-methods
             self.quotes.append(Quotation(message=message))
 
     @property
-    def updated_at(self):
+    def unidentified_rats(self) -> typing.List[str]:
         """
-        Last time the rescue object was changed
-
-        Returns:
-            datetime
-        """
-
-        return self._updated_at
-
-    @updated_at.setter
-    def updated_at(self, value):
-        """
-        Updates `Rescue.updated_at` property
-
-        Args:
-            value (datetime): new last modified datetime
-
-        Raises:
-            TypeError: invalid `value` type.
-            ValueError: `value` is earlier than creation date.
-
-        Returns:
-
-        """
-        if not isinstance(value, datetime):
-            raise TypeError(f"Expected datetime, got {type(value)}")
-        if value < self.created_at:
-            raise ValueError(f"{value} is older than the cases creation date!")
-        self._updated_at = value
-
-    @property
-    def unidentified_rats(self) -> List[str]:
-        """
-        List of unidentified rats by their IRC nicknames
+        typing.List of unidentified rats by their IRC nicknames
 
         Returns:
             list: unidentified rats by IRC nickname
@@ -566,7 +514,7 @@ class Rescue:  # pylint: disable=too-many-public-methods
             raise TypeError(f"expected type bool, got {type(value)}")
 
     @property
-    def epic(self) -> List[Epic]:
+    def epic(self) -> typing.List[Epic]:
         """
         Epic status of the rescue.
 
@@ -666,7 +614,7 @@ class Rescue:  # pylint: disable=too-many-public-methods
             raise TypeError(f"got {type(value)} expected MarkForDeletion object")
 
     @property
-    def rats(self) -> List[Rat]:
+    def rats(self) -> typing.List[Rat]:
         """
         Identified rats assigned to rescue
 
@@ -696,7 +644,7 @@ class Rescue:  # pylint: disable=too-many-public-methods
     async def add_rat(self,
                       name: str = None,
                       guid: UUID or str = None,
-                      rat: Rat = None) -> Optional[Rat]:
+                      rat: Rat = None) -> typing.Optional[Rat]:
         """
         Adds a rat to the rescue. This method should be run inside a `try` block, as failures will
         be raised as exceptions.
@@ -721,7 +669,7 @@ class Rescue:  # pylint: disable=too-many-public-methods
 
             ```
         """
-        assigned_rat: Optional[Rat] = None
+        assigned_rat: typing.Optional[Rat] = None
 
         if isinstance(rat, Rat):
             # we already have a rat object, lets verify it has an ID and assign it.
