@@ -32,8 +32,32 @@ LOG = logging.getLogger(f"mecha.{__name__}")
 
 class Rescue:  # pylint: disable=too-many-public-methods
     """
-    A unique rescue
+    A unique rescuer
     """
+    __slots__ = ["_platform",
+                 "rat_board",
+                 "_rats",
+                 "_created_at",
+                 "_updated_at",
+                 "_api_id",
+                 "_client",
+                 "_irc_nick",
+                 "_unidentified_rats",
+                 "_system",
+                 "_active",
+                 "_quotes",
+                 "_epic",
+                 "_code_red",
+                 "_outcome",
+                 "_title",
+                 "_first_limpet",
+                 "_board_index",
+                 "_mark_for_deletion",
+                 "_board_index",
+                 "_lang_id",
+                 "_status",
+                 "_hash",
+                 "_modified_attrs"]
 
     def __init__(self,  # pylint: disable=too-many-locals
                  uuid: UUID = None,
