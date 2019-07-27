@@ -24,9 +24,6 @@ from ..quotation import Quotation
 from ..rat import Rat
 from ..utils import Platforms, Status
 
-if typing.TYPE_CHECKING:
-    from ..board import RatBoard
-
 LOG = logging.getLogger(f"mecha.{__name__}")
 
 
@@ -35,7 +32,6 @@ class Rescue:  # pylint: disable=too-many-public-methods
     A unique rescuer
     """
     __slots__ = ["_platform",
-                 "rat_board",
                  "_rats",
                  "_created_at",
                  "_updated_at",
@@ -64,7 +60,6 @@ class Rescue:  # pylint: disable=too-many-public-methods
                  client: typing.Optional[str] = None,
                  system: typing.Optional[str] = None,
                  irc_nickname: typing.Optional[str] = None,
-                 board: 'RatBoard' = None,
                  unidentified_rats: typing.Optional[typing.List[str]] = None,
                  active: bool = True,
                  quotes: typing.Optional[typing.List[Quotation]] = None,
@@ -107,7 +102,6 @@ class Rescue:  # pylint: disable=too-many-public-methods
             platform(Platforms): Platform for rescue
         """
         self._platform: Platforms = platform
-        self.rat_board: 'RatBoard' = board  # FIXME -> private attr
         self._rats = rats if rats else []
         self._api_id: UUID = uuid if uuid else uuid4()
         self._client: str = client
