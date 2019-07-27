@@ -89,7 +89,6 @@ class Rescue:  # pylint: disable=too-many-public-methods
             client (str): Commander name of the Commander rescued
             system (str): System name the Commander is stranded in
                 (WILL BE CAST TO UPPER CASE)
-            updated_at (datetime): last time the case was modified
             unidentified_rats (list): list of unidentified rats responding to
                 rescue **(nicknames)**
             active (bool): marks whether the case is active or not
