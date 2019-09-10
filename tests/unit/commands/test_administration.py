@@ -18,6 +18,7 @@ LOG = logging.getLogger(f"mecha.{__name__}")
 import pytest
 import string
 
+
 @pytest.mark.asyncio
 async def test_rehash_dm(context_pm_fx, bot_fx, async_callable_fx, monkeypatch):
     """
@@ -81,3 +82,8 @@ async def test_rehash_successful(bot_fx, callable_fx, monkeypatch):
     assert some_checksum in bot_fx.sent_messages[1]['message']
     # and that success is
     assert "success" in bot_fx.sent_messages[1]['message']
+
+
+@pytest.mark.asyncio
+async def test_list_plain(bot_fx, rat_board_fx):
+    pytest.xfail(NotImplemented)

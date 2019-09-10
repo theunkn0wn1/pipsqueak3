@@ -3,8 +3,8 @@ import io
 import itertools
 import logging
 import typing
-from dataclasses import dataclass
 
+from src.commands._list_flags import ListFlags
 from src.packages.board import BOARD_KEY_TYPE
 from src.packages.commands import command
 from src.packages.context import Context
@@ -164,64 +164,26 @@ async def cmd_list(ctx: Context):
         await ctx.reply("No active rescues.")
     else:
 
-        buffer = io.StringIO()
-        buffer.write(f"{len(active_rescues):3} active cases. ")
-        for rescue in active_rescues:
-            buffer.write(format(rescue, format_specifiers))
-            buffer.write('\n')
-        await ctx.reply(buffer.getvalue())
+        output = _list_rescue(active_rescues, format_specifiers)
+        if output:
+            await ctx.reply(output)
     if flags.show_inactive:
         if not inactive_rescues:
             return await ctx.reply("No inactive rescues.")
 
-        buffer = io.StringIO()
-        buffer.write(f"{len(inactive_rescues):3} inactive cases. ")
-        for rescue in inactive_rescues:
-            buffer.write(format(rescue, format_specifiers))
-            buffer.write('\n')
-        await ctx.reply(buffer.getvalue())
+        output = _list_rescue(inactive_rescues, format_specifiers)
+        if output:
+            await ctx.reply(output)
 
 
-@dataclass(frozen=True)
-class ListFlags:
-    """
-    Flags used by the !list command, includes a parser.
-    """
-    show_inactive: bool = False
-    filter_unassigned_rescues: bool = False
-    show_assigned_rats: bool = False
-    show_uuids: bool = False
-
-    @classmethod
-    def from_word(cls, argument: str):
-        """
-        construct an object from a given argument word
-
-        Args:
-            argument(str): flags word
-
-        Returns:
-            ListFlags instance
-        """
-        argument = argument.casefold()
-
-        show_inactive = "i" in argument
-        """
-        Show inactive rescues
-        """
-        show_assigned_rats = "r" in argument
-        """
-        Show assigned rats per rescue
-        """
-        filter_unassigned_rescues = "u" in argument
-        """
-        only show rescues without assigned rats
-        """
-        show_uuids = "@" in argument
-        """
-        show API UUIDs
-        """
-        return cls(show_inactive, filter_unassigned_rescues, show_assigned_rats, show_uuids)
+def _list_rescue(rescue_collection, format_specifiers):
+    buffer = io.StringIO()
+    buffer.write(f"{len(rescue_collection):3} active cases. ")
+    for rescue in rescue_collection:
+        buffer.write(format(rescue, format_specifiers))
+        buffer.write('\n')
+    output = buffer.getvalue()
+    return output.rstrip('\n')
 
 
 def _rescue_filter(flags: ListFlags,
