@@ -17,6 +17,7 @@ import typing
 from collections import abc
 from contextlib import asynccontextmanager
 from uuid import UUID
+import asyncio.queues
 
 from src.packages.rescue import Rescue
 
@@ -76,7 +77,9 @@ class RatBoard(abc.Mapping):
                  "_storage_by_client",
                  "_handler",
                  "_storage_by_index",
-                 "_index_counter"]
+                 "_index_counter",
+                 "_recently_closed_deck"
+                 ]
 
     def __init__(self, api_handler=None):
         self._handler = api_handler
@@ -99,6 +102,8 @@ class RatBoard(abc.Mapping):
         """
         Internal counter for tracking used indexes
         """
+
+        self._recently_closed_deck = asyncio.queues.Queue(maxsize=5)
 
     def __getitem__(self, key: _KEY_TYPE) -> Rescue:
         if isinstance(key, str):
@@ -239,3 +244,34 @@ class RatBoard(abc.Mapping):
             # we need to be sure to re-append the rescue upon completion
             # (so errors don't drop cases)
             await self.append(target)
+
+    async def close_rescue(self, key: _KEY_TYPE) -> None:
+        """
+        Clear the specified rescue from the board
+
+        Args:
+            key:
+
+        Returns:
+
+        """
+        # sanity check
+        if key not in self:
+            raise KeyError(key)
+
+        subject_rescue = self[key]
+        subject_rescue.open = False
+        # pop an item from FIFO queue to make room
+        if self._recently_closed_deck.full():
+            self._recently_closed_deck.get_nowait()
+            # with queues this needs to be called for `.join()` to work 🤷‍
+            self._recently_closed_deck.task_done()
+
+        # append this rescue object
+        self._recently_closed_deck.put_nowait(subject_rescue)
+
+        # TODO API integration callback
+
+        # stop actively tracking it
+        del self[key]
+

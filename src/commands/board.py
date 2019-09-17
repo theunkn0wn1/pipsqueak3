@@ -5,6 +5,7 @@ import logging
 import typing
 
 from src.commands._list_flags import ListFlags
+from src.commands._shared import coerce_rescue_type
 from src.packages.board import BOARD_KEY_TYPE
 from src.packages.commands import command
 from src.packages.context import Context
@@ -233,14 +234,40 @@ async def cmd_active(ctx: Context):
     await ctx.reply(f"{rescue.client}'s case is now {'active' if rescue.active else 'inactive'}")
 
 
-def coerce_rescue_type(target):
-    if target.isnumeric():
-        target = int(target)
+@require_permission(RAT)
+@require_channel
+@command("clear", "close")
+async def cmd_close(ctx: Context):
+    """
+    clear a case
+     TODO: complete docstring
+    Args:
+        ctx:
+
+    Returns:
+
+    """
+
+    # unpacking word list into targets
+    _, raw_rescue_target, *remaining_words = ctx.words
+    if remaining_words:
+        raw_rat_target, *remaining_words = remaining_words
     else:
-        target_mabie = try_parse_uuid(target)
+        raw_rat_target = None
 
-        if target_mabie:
-            target = target_mabie
+    LOG.debug(f"rescue target:= {raw_rescue_target}")
+    LOG.debug(f"rat target:= {raw_rat_target}")
+    LOG.debug(f"remainder:= {remaining_words}")
+    if remaining_words:
+        raise RuntimeError("usage error")  # TODO proper usage errors
 
-        del target_mabie
-    return target
+    # convert the specified rescue argument into a key for lookup
+    rescue_key = coerce_rescue_type(raw_rescue_target)
+    if rescue_key not in ctx.bot.board:
+        # not a tracked rescue, bail out
+        return await ctx.reply("Could not find a case with that name or number.")
+
+    # get the client's name before we close the rescue
+    client = ctx.bot.board[rescue_key].client
+    await ctx.bot.board.close_rescue(rescue_key)
+    await ctx.reply(f"Case {client} got cleared! ")
