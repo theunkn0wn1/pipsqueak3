@@ -247,14 +247,15 @@ async def cmd_close(ctx: Context):
     Returns:
 
     """
-
-    # unpacking word list into targets
-    _, raw_rescue_target, *remaining_words = ctx.words
-    if remaining_words:
-        raw_rat_target, *remaining_words = remaining_words
-    else:
-        raw_rat_target = None
-
+    try:
+        # unpacking word list into targets
+        _, raw_rescue_target, *remaining_words = ctx.words
+        if remaining_words:
+            raw_rat_target, *remaining_words = remaining_words
+        else:
+            raw_rat_target = None
+    except ValueError:
+        raise RuntimeError("usage error")  # TODO proper usage errors
     LOG.debug(f"rescue target:= {raw_rescue_target}")
     LOG.debug(f"rat target:= {raw_rat_target}")
     LOG.debug(f"remainder:= {remaining_words}")
