@@ -27,7 +27,6 @@ _CALLABLE_TYPE = "typing.Callable[[Context, ...], typing.Any]"
 
 @dataclass
 class Command:
-    alias: str
     underlying: _CALLABLE_TYPE
     usage: str = ""
     pre_execution_hooks: typing.List[_CALLABLE_TYPE] = field(default_factory=list)
@@ -51,4 +50,4 @@ async def uhh(ctx: Context, potaot: int):
     ...
 
 
-command = Command(alias="uhh", underlying=uhh)
+# command = Command( underlying=uhh)

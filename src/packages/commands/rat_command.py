@@ -105,7 +105,7 @@ def _register(func, names: list or str) -> bool:
             raise NameCollisionException(f"attempted to re-register command(s) {alias}")
         else:
             formed_dict = {alias: func}
-            _registered_commands.update(formed_dict)
+            _registered_commands[alias] = func
 
     return True
 

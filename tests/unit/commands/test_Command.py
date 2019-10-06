@@ -5,7 +5,7 @@ import pytest
 
 @pytest.mark.asyncio
 async def test_abort(bot_fx, context_fx, async_callable_fx):
-    cmd = Command(alias="alias", underlying=async_callable_fx, usage="usage text")
+    cmd = Command(underlying=async_callable_fx, usage="usage text")
     async_callable_fx.exception_to_raise = Abort
     await cmd(context_fx)
 
@@ -15,7 +15,7 @@ async def test_abort(bot_fx, context_fx, async_callable_fx):
 
 @pytest.mark.asyncio
 async def test_usage_error(bot_fx, context_fx, async_callable_fx):
-    cmd = Command(alias="alias", underlying=async_callable_fx, usage="usage text")
+    cmd = Command(underlying=async_callable_fx, usage="usage text")
     async_callable_fx.exception_to_raise = UsageError
     await cmd(context_fx)
 
