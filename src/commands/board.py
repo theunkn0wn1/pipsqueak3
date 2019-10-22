@@ -15,6 +15,7 @@ from ..packages.utils import Platforms
 from ..packages.utils.ratlib import try_parse_uuid
 from loguru import logger
 
+
 @command("inject")
 @require_channel
 # @require_permission(RAT)
@@ -270,3 +271,28 @@ async def cmd_close(ctx: Context):
     client = ctx.bot.board[rescue_key].client
     await ctx.bot.board.close_rescue(rescue_key)
     await ctx.reply(f"Case {client} got cleared! ")
+
+
+@require_permission(RAT)
+@require_channel
+@command("cr", "codered")
+async def cmd_code_red(ctx: Context):
+    logger.trace("in cmd_code_red")
+    _, target, *words = ctx.words
+
+    if words:
+        raise RuntimeError("usage error")  # FIXME usage errors
+
+    target = coerce_rescue_type(target)
+
+    if target not in ctx.bot.board:
+        return await ctx.reply(f"Unable to find rescue by key '{target}'. Check your spelling.")
+
+    async with ctx.bot.board.modify_rescue(target) as rescue:
+        logger.debug("rescue number {} entered with CR state", rescue.board_index, rescue.code_red)
+        rescue.code_red = not rescue.code_red
+
+        if rescue.code_red:
+            await ctx.bot.message(ctx.channel, f"CODE RED! {rescue.client} is on emergency oxygen")
+        else:
+            await ctx.bot.message(ctx.channel, f"{rescue.client}'s case is no longer CR")
