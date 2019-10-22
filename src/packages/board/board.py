@@ -12,12 +12,12 @@ See LICENSE.md
 from __future__ import annotations
 
 import itertools
-import logging
 import typing
 from collections import abc
 from contextlib import asynccontextmanager
 from uuid import UUID
 import asyncio.queues
+from loguru import logger
 
 from src.packages.rescue import Rescue
 
@@ -32,8 +32,6 @@ Notes:
     to keep assigned case numbers below this value whenever possible.
 """
 _KEY_TYPE = typing.Union[str, int, UUID]  # pylint: disable=invalid-name
-
-LOG = logging.getLogger(f"mecha.{__name__}")
 
 
 @CONFIG_MARKER

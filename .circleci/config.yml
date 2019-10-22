@@ -13,7 +13,7 @@ jobs:
     docker:
       # specify the version you desire here
       # use `-browsers` prefix for selenium tests, e.g. `3.6.1-browsers`
-      - image: circleci/python:3.7
+      - image: circleci/python:3.7-stretch
         environment:
           # set an env token to where our circleci database is
           # by default the user is `root` and the db name is `circle_test`
@@ -97,7 +97,7 @@ jobs:
       PIPENV_VENV_IN_PROJECT: true
 
     docker:
-      - image: circleci/python:3.7
+      - image: circleci/python:3.7-stretch
         environment:
           # set an env token to where our circleci database is
           # by default the user is `root` and the db name is `circle_test`
@@ -166,7 +166,7 @@ jobs:
       - run:
           name: smoke test
           command: |
-            timeout 10 pipenv run python -m src --config circle.toml || :
+            timeout 10 pipenv run python -m src --config testing.toml || :
             grep -i "Connected to IRC" logs/unit_tests.log
 
   setup_workspace:

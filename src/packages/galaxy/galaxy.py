@@ -12,7 +12,6 @@ See LICENSE.md
 
 import asyncio
 import json
-import logging
 import typing
 from html import escape
 
@@ -21,8 +20,6 @@ import aiohttp
 from src.config import CONFIG_MARKER
 from .star_system import StarSystem
 from ..utils import Vector
-
-LOG = logging.getLogger(f"mecha.{__name__}")
 
 
 class Galaxy:
@@ -84,7 +81,7 @@ class Galaxy:
     "A ClientTimeout object representing the total time an HTTP request can take before failing."
 
     def __init__(self, url: str = None):
-        self.url = url or self._config['api']['url']
+        self.url = url or self._config['system_api']['url']
 
     async def find_system_by_name(self, name: str) -> typing.Optional[StarSystem]:
         """
