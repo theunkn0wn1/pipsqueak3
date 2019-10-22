@@ -86,4 +86,4 @@ async def test_rehash_successful(bot_fx, callable_fx, monkeypatch):
 
 @pytest.mark.asyncio
 async def test_list_plain(bot_fx, rat_board_fx):
-    pytest.xfail(NotImplemented)
+    pytest.xfail("NotImplemented")

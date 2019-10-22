@@ -4,18 +4,16 @@ import itertools
 import logging
 import typing
 
-from src.commands._list_flags import ListFlags
-from src.commands._shared import coerce_rescue_type
-from src.packages.board import BOARD_KEY_TYPE
-from src.packages.commands import command
-from src.packages.context import Context
-from src.packages.permissions import require_channel, require_permission, RAT
-from src.packages.rescue import Rescue
-from src.packages.utils import Platforms
-from src.packages.utils.ratlib import try_parse_uuid
-
-LOG = logging.getLogger(f"mecha.{__name__}")
-
+from ._list_flags import ListFlags
+from ._shared import coerce_rescue_type
+from ..packages.board import BOARD_KEY_TYPE
+from ..packages.commands import command
+from ..packages.context import Context
+from ..packages.permissions import require_channel, require_permission, RAT
+from ..packages.rescue import Rescue
+from ..packages.utils import Platforms
+from ..packages.utils.ratlib import try_parse_uuid
+from loguru import logger
 
 @command("inject")
 @require_channel
@@ -35,13 +33,13 @@ async def cmd_inject(ctx: Context):
 
         # !inject {target} {words} {*words}
     _, target, *words = ctx.words
-    LOG.debug(f"in inject, target := {target}")
+    logger.trace(f"in inject, target := {target}")
     if target.isnumeric():
         # first argument is numeric, parse it into an integer (should be safe due to .isnumeric)
-        LOG.debug("first word is numerical, looking for an existing")
+        logger.debug("first word is numerical, looking for an existing")
         index = int(target)
         if index not in ctx.bot.board:
-            LOG.warning(f"unable to locate rescue by index {index}!")
+            logger.warning(f"unable to locate rescue by index {index}!")
             return await ctx.reply(f"unable to find rescue at index {index: <3}")
         return await _inject_do_update(ctx, int(target), remainder(words))
 
@@ -51,14 +49,14 @@ async def cmd_inject(ctx: Context):
     uuid = try_parse_uuid(target if not target.startswith('@') else target[1:])
     # if the uuid is None, or it parses successfully but does not exist in board
     if uuid and uuid not in ctx.bot.board:
-        LOG.debug(f"inject invoked against a subject uuid {uuid} but it wasn't in the board")
+        logger.debug(f"inject invoked against a subject uuid {uuid} but it wasn't in the board")
         await ctx.reply(f"unable to find rescue @{uuid}")
         return
 
     if uuid:
         return await _inject_do_update(ctx, uuid, payload=remainder(words))
 
-    LOG.debug("nothing else fits the bill, making a new rescue...")
+    logger.debug("nothing else fits the bill, making a new rescue...")
     # check if a platform is specified, must be the whole word
     # (prevents weirdness with words that start contain pc and friends)
     for platform_str in ("pc", "ps", "xb", "xbox"):
@@ -142,7 +140,7 @@ async def cmd_list(ctx: Context):
 
     else:
         raise RuntimeError  # FIXME: usage error
-    LOG.debug(f"flags set:= {flags} \t platform_filter := {platform_filter}")
+    logger.debug(f"flags set:= {flags} \t platform_filter := {platform_filter}")
     active_rescues: typing.List[Rescue] = []
     inactive_rescues: typing.List[Rescue] = []
 
@@ -256,9 +254,9 @@ async def cmd_close(ctx: Context):
             raw_rat_target = None
     except ValueError:
         raise RuntimeError("usage error")  # TODO proper usage errors
-    LOG.debug(f"rescue target:= {raw_rescue_target}")
-    LOG.debug(f"rat target:= {raw_rat_target}")
-    LOG.debug(f"remainder:= {remaining_words}")
+    logger.debug(f"rescue target:= {raw_rescue_target}")
+    logger.debug(f"rat target:= {raw_rat_target}")
+    logger.debug(f"remainder:= {remaining_words}")
     if remaining_words:
         raise RuntimeError("usage error")  # TODO proper usage errors
 
