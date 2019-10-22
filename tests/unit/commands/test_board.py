@@ -55,3 +55,30 @@ async def test_inject_existing(bot_fx, rat_board_fx, rescue_sop_fx):
     await board_commands.cmd_inject(context)
 
     assert len(rat_board_fx) == 1, "inject made a second case...."
+
+
+@pytest.mark.parametrize("initial_state", [True, False])
+@pytest.mark.parametrize("method", ["client", "board_index", "api_id"])
+async def test_code_red(bot_fx, rat_board_fx, rescue_sop_fx, method, initial_state):
+    rescue_sop_fx.code_red = initial_state
+    await rat_board_fx.append(rescue_sop_fx)
+
+    payload = f"!cr {getattr(rescue_sop_fx, method)}"
+    context = await Context.from_message(bot_fx, "#fuelrats", "some_rat", payload)
+
+    await board_commands.cmd_code_red(context)
+
+    assert rescue_sop_fx.code_red != initial_state
+
+    response = bot_fx.sent_messages[0]['message']
+    assert "CODE RED" if not initial_state else "no longer" in response, \
+        f"bad response received := '{response}'"
+
+
+async def test_code_red_miss(bot_fx, rat_board_fx):
+    payload = "!cr bigRedButton"
+    context = await Context.from_message(bot_fx, "#fuelrats", "some_rat", payload)
+
+    await board_commands.cmd_code_red(context)
+
+    assert "Unable to find" in bot_fx.sent_messages[0]['message']

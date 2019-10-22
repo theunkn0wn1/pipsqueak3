@@ -41,6 +41,17 @@ class MockBot(MechaClient):
                 "realname": "some pun-ter",
 
             },
+            "some_rat": {
+                "nickname": "depsatch",
+                "username": "my_tail",
+                "hostname": "rat.fuelrats.com",
+                "away": False,
+                "away_message": None,
+                "account": None,
+                "identified": True,
+                "realname": "l33t ta1l",
+
+            },
             "some_ov": {
                 "nickname": "some_ov",
                 "username": "ill_stop",
