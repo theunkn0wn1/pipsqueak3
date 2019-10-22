@@ -281,7 +281,7 @@ async def cmd_code_red(ctx: Context):
     _, target, *words = ctx.words
 
     if words:
-        raise RuntimeError("usage error")  # FIXME usage errors
+        return await ctx.reply("usage: cr <client or case number>")
 
     target = coerce_rescue_type(target)
 
