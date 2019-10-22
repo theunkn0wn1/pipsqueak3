@@ -26,7 +26,7 @@ _CALLABLE_TYPE = "typing.Callable[[Context, ...], typing.Any]"
 @dataclass
 class Command:
     underlying: _CALLABLE_TYPE
-    usage: str = ""
+    usage: str
     pre_execution_hooks: typing.List[_CALLABLE_TYPE] = field(default_factory=list)
 
     async def __call__(self, ctx: Context):
