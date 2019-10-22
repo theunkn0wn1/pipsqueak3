@@ -23,14 +23,26 @@ from loguru import logger
 _CALLABLE_TYPE = "typing.Callable[[Context, ...], typing.Any]"
 
 
-@dataclass
 class Command:
-    underlying: _CALLABLE_TYPE
-    usage: str
-    pre_execution_hooks: typing.List[_CALLABLE_TYPE] = field(default_factory=list)
 
-    async def __call__(self, ctx: Context):
+    def __init__(self, *names: str, usage: str):
+        self.names = names
+        self.underlying: typing.Optional[_CALLABLE_TYPE] = None
+        self.usage: str = usage
+        self.pre_execution_hooks: typing.List[_CALLABLE_TYPE] = field(default_factory=list)
+
+    def __call__(self, underlying: _CALLABLE_TYPE):
+        self.underlying = underlying
+        return self
+
+    def __repr__(self):
+        return f"Command(*{self.names}, usage='{self.usage}')"
+
+    async def invoke(self, ctx: Context):
         logger.trace("entering command __call__")
+        if not self.underlying:
+            logger.error("underlying for {} is undefined!", self)
+            raise ValueError("underlying is undefined!")
         extra_args: typing.Dict[str, typing.Any] = {}
 
         result = None

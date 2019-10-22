@@ -12,6 +12,8 @@ See LICENSE.md
 """
 
 from . import rat_command
+from ._command import Command
+from ._exceptions import Abort, UsageError
 from .rat_command import command, trigger
 
-__all__ = ["command", "trigger"]
+__all__ = ["command", "trigger", "UsageError", "Abort", "Command"]
