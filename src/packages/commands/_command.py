@@ -27,11 +27,16 @@ class Command:
 
     def __init__(self, *names: str, usage: str):
         self.names = names
+        # its set during the __call__ phase of the decorator
         self.underlying: typing.Optional[_CALLABLE_TYPE] = None
         self.usage: str = usage
-        self.pre_execution_hooks: typing.List[_CALLABLE_TYPE] = field(default_factory=list)
+        self.pre_execution_hooks: typing.List[_CALLABLE_TYPE] = []
 
     def __call__(self, underlying: _CALLABLE_TYPE):
+        if self.underlying:
+            logger.error("__call__ invoked for a second time on this decorator!")
+            raise RuntimeError("you should not call this decorator twice")
+
         self.underlying = underlying
         return self
 
