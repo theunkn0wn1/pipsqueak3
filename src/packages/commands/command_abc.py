@@ -15,6 +15,7 @@ from ..rescue import Rescue
 class UsageError(ValueError):
     """ incorrect command usage """
 
+
 @attr.dataclass
 class CommandABC(ABC):
     ctx: Context
@@ -56,6 +57,11 @@ class CommandABC(ABC):
 
             elif field.type == "Rescue":
                 kwargs[field.name] = cls.get_rescue(ctx, words.popleft())
+
+            elif field.type == "int":
+                kwargs[field.name] = int(words.popleft())
+            elif field.type == "float":
+                kwargs[field.name] = float(words.popleft())
 
             else:
                 # unknown type
