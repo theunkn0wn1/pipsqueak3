@@ -26,6 +26,7 @@ jobs:
         poetry run pytest --doctest-modules --junitxml=junit/test-results-${{ matrix.python-version }}.xml
       with:
         name: pytest-results-${{ matrix.python-version }}
+        uses: actions/upload-artifact@v2
         path: junit/test-results-${{ matrix.python-version }}.xml
       # Use always() to always run this step to publish test results when there are test failures
       if: ${{ always() }}
