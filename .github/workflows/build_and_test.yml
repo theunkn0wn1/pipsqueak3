@@ -22,8 +22,8 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - name: Configure Postgres
       - uses: actions/checkout@v2
+      - name: Configure Postgres
         env:
           TEST_DATABASE_URL: postgresql://postgres:mecha@facts_database/postgres
         run: |
